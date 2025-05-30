@@ -25,32 +25,32 @@ const Sidebar = ({ expanded, role }: { expanded: boolean, role: string   }) => {
       hrefLink: "/admin/dashboard",
       name: "Dashboard",
     },
-    role === "superAdmin" ? {
+    role === "super_admin" ? {
       icon: <Users size={expanded ? 16 : 24} />,
       hrefLink: "/admin/tenants",
       name: "Tenants",
     } : null,
-    role === "admin" ? {
+    role === "owner" ? {
       icon: <Users size={expanded ? 16 : 24} />,
       hrefLink: "/admin/users",
       name: "Users",
     } : null,
-    role === "admin" ?   {
+    role === "owner" ?   {
       icon: <UserSearch size={expanded ? 16 : 24} />,
       hrefLink: "/admin/contacts",
       name: "Contacts",
     } : null,
-    role === "admin" ? {
+    role === "owner" ? {
       icon: <Ticket size={expanded ? 16 : 24} />,
       hrefLink: "/admin/tickets",
       name: "Tickets",
     } : null,
-     role === "superAdmin" ? {
+     role === "super_admin" ? {
       icon: <Settings size={expanded ? 16 : 24} />,
       hrefLink: "/admin/settings",
       name: "Settings",
     } : null,
-    role === "admin" ? {
+    role === "owner" ? {
       icon: <MessageCircle size={expanded ? 16 : 24} />,
       hrefLink: "/admin/whatsapp-message",
       name: "Whatsapp Message",

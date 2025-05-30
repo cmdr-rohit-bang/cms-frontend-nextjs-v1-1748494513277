@@ -1,9 +1,9 @@
 "use client";
 import React, { Suspense, useState } from "react";
-import { Toaster } from "@/components/ui/toaster";
 import Sidebar from "@/components/common/sidebar";
 import AdminNav from "@/components/common/admin-nav";
-import { useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";   
+import { Toaster } from "sonner";
 
 interface DashboardLayoutProps {
   children?: React.ReactNode;
@@ -12,7 +12,7 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [expanded, setExpanded] = useState(true);
   const session = useSession();
-  const role = session?.data?.user?.role || "superAdmin";
+  const role = session?.data?.user?.role || "super_admin";
 
   return (
     <div className="flex justify-between min-h-screen w-full bg-muted/40 relative bg-white">

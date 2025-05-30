@@ -14,7 +14,8 @@ import {
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+
 import { Button } from "../ui/button";
 import { PasswordInput } from "../common/password-input";
 import { toast } from "sonner";
@@ -37,7 +38,9 @@ const adminFormSchema = z.object({
 export function UserAuthForm() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const form = useForm<z.infer<typeof adminFormSchema>>({
+  const { subdomain } = useParams();
+  console.log("subdomain",subdomain);
+    const form = useForm<z.infer<typeof adminFormSchema>>({
     resolver: zodResolver(adminFormSchema),
     defaultValues: {
       email: "",
@@ -50,7 +53,9 @@ export function UserAuthForm() {
     const signInData = await signIn("credentials", {
       email: data.email,
       password: data.password,
+      tenant: "true",
       redirect: false,
+      subdomain: subdomain as string  ,
     });
 
     if (signInData?.ok) {
@@ -63,7 +68,7 @@ export function UserAuthForm() {
       setIsLoading(false);
       toast.error("Invalid credentials.", {
         position: "top-right",
-       });
+      });
     }
   }
 
@@ -106,13 +111,25 @@ export function UserAuthForm() {
                 </FormItem>
               )}
             />
-            <Button className="mt-2" disabled={isLoading}>
-              Login
+            <Button
+              type="submit"
+              className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+              disabled={isLoading}
+            >
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  <span>Logging in...</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <span>Log in</span>
+                </div>
+              )}
             </Button>
           </div>
         </form>
       </Form>
- 
     </div>
   );
 }

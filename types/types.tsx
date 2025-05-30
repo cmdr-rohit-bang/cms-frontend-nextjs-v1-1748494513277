@@ -24,6 +24,15 @@ export interface Tenants {
   order_number:number
 }
 
+export interface Pagination {
+  current_page: number;
+  total_pages: number;
+  total_items: number;
+  items_per_page: number;
+  has_next: boolean;
+  has_previous: boolean;
+}
+
 export interface Contact {
   id: string;
   firstName: string;
@@ -31,18 +40,24 @@ export interface Contact {
   email: string;
 }
 
-export interface User {
+export interface Admin {
   id: string;
-  order_number: number;
-  success: boolean;
-  message: string;
-  token: string;
+  first_name: string;
+  last_name: string;
+  name: string;
+  email: string;
   role: string;
-  data: {
-    id: number;
-    name: string;
-    email: string;
-  };
+  status: string;
+  phone_number: string;
+  job_title: string;
+  last_login_at: string;
+  expires_in: number;
+}
+
+export interface User {
+  access_token: string;
+  order_number: number;
+  admin:Admin;
 }
 export interface TicketType {
   id?: string;

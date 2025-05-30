@@ -57,3 +57,13 @@ export const deleteData = async (endpoint: string) => {
     throw error;
   }
 };
+
+export const changeStatus = async (endpoint: string, data: any) => {
+  try {
+    const response = await apiClient.post(endpoint, data);
+    return response.data;
+  } catch (error) {
+    console.error("Error changing status:", error);
+    throw error;
+  }
+};

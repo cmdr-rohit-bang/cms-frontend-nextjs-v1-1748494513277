@@ -52,16 +52,28 @@ const permissions = [
 
 const userFormSchema = z
   .object({
-    name: z.string().min(2, { message: "Required" }),
-    email: z.string().email({ message: "Required" }),
+    name: z.string().min(2, { message: "Required" }).trim(),
+    email: z.string().email({ message: "Required" }).trim(),
     password: z
-      .string()
-      .min(6, { message: "Password must be at least 6 characters" }),
+    .string()
+    .min(8, { message: 'Be at least 8 characters long' })
+    .regex(/[a-zA-Z]/, { message: 'Contain at least one letter.' })
+    .regex(/[0-9]/, { message: 'Contain at least one number.' })
+    .regex(/[^a-zA-Z0-9]/, {
+      message: 'Contain at least one special character.',
+    })
+    .trim(),
     confirm_password: z
       .string()
-      .min(6, { message: "Password must be at least 6 characters" }),
+      .min(8, { message: 'Be at least 8 characters long' })
+      .regex(/[a-zA-Z]/, { message: 'Contain at least one letter.' })
+      .regex(/[0-9]/, { message: 'Contain at least one number.' })
+      .regex(/[^a-zA-Z0-9]/, {
+        message: 'Contain at least one special character.',
+      })
+      .trim(),
     permissions: z.array(z.string()).optional(),
-    phone: z.string().min(10, { message: "Required" }),
+    phone: z.string().min(10, { message: "Required" }).trim(),
     status: z.boolean().default(false),
     role: z.string(),
   })

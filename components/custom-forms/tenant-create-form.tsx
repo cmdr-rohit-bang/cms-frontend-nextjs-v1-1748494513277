@@ -199,9 +199,7 @@ export default function TenantCreateForm({
           </div>
 
           <div className="mt-8 flex justify-end gap-2">
-            <Button asChild type="button" variant="outline">
-              <Link href="/admin/tenants"> Cancel </Link>
-            </Button>
+           
             <Button
               type="submit"
               disabled={isLoading}

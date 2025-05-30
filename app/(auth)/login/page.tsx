@@ -1,39 +1,35 @@
-"use client"
-import type React from "react"
-import { useState } from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import {
-  Grid3X3,
-  Eye,
-  EyeOff,
-  ArrowRight,
-} from "lucide-react"
-import { signIn } from "next-auth/react"
-import { toast } from "sonner"
+"use client";
+import type React from "react";
+import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Grid3X3, Eye, EyeOff, ArrowRight } from "lucide-react";
+import { signIn } from "next-auth/react";
+import { toast } from "sonner";
 
 export default function LoginPage() {
-  const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-  })
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     // Simulate API call
     const signInData = await signIn("credentials", {
       email: formData.email,
       password: formData.password,
       redirect: false,
+      tenant: "false",
     });
 
     if (signInData?.ok) {
@@ -46,15 +42,14 @@ export default function LoginPage() {
       setIsLoading(false);
       toast.error("Invalid credentials.", {
         position: "top-right",
-       });
+      });
     }
-  }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
-  
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   return (
     <div className="flex min-h-screen flex-col md:flex-row">
@@ -67,8 +62,12 @@ export default function LoginPage() {
           </div>
 
           <div className="mb-8">
-            <h1 className="text-2xl font-bold tracking-tight mb-2">Welcome back</h1>
-            <p className="text-muted-foreground">Enter your credentials to access your account</p>
+            <h1 className="text-2xl font-bold tracking-tight mb-2">
+              Welcome back
+            </h1>
+            <p className="text-muted-foreground">
+              Enter your credentials to access your account
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -89,7 +88,10 @@ export default function LoginPage() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">Password</Label>
-                  <Link href="/forgot-password" className="text-sm font-medium text-primary hover:underline">
+                  <Link
+                    href="/forgot-password"
+                    className="text-sm font-medium text-primary hover:underline"
+                  >
                     Forgot password?
                   </Link>
                 </div>
@@ -131,10 +133,6 @@ export default function LoginPage() {
                 </div>
               )}
             </Button>
-
-           
-
-
           </form>
         </div>
       </div>
@@ -151,7 +149,9 @@ export default function LoginPage() {
               className="mx-auto"
             />
           </div>
-          <h2 className="text-2xl font-bold mb-4">Build Your Business CMS in Minutes</h2>
+          <h2 className="text-2xl font-bold mb-4">
+            Build Your Business CMS in Minutes
+          </h2>
           <ul className="space-y-3">
             <li className="flex items-start gap-2">
               <div className="mt-1 rounded-full bg-white/20 p-1">
@@ -233,5 +233,5 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

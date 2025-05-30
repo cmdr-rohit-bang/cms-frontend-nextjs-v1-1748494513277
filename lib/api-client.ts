@@ -14,8 +14,8 @@ apiClient.interceptors.request.use(
     // Fetch session token only if it's not already cached
     if (!token) {
       const session = await getSession();
-      if (session && session.user && session.user.token) {
-        token = session.user.token;
+      if (session && session.user && session.user.accessToken) {
+        token = session.user.accessToken;
       }
     }
 

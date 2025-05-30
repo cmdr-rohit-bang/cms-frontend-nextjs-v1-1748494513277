@@ -22,7 +22,7 @@ import SearchInput from "../search-input/search-input";
 import Pagination from "../pagination/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
-
+import { Pagination as PaginationType } from "@/types/types";
 
 interface Column {
   id: string;
@@ -54,6 +54,7 @@ interface DataTableProps<
   pageNumber: number;
   basePath?: string;
   renderViewContent?: (data: TData) => React.ReactNode;
+  pagination?: PaginationType;
 }
 
 export function DataTable<
@@ -78,6 +79,7 @@ export function DataTable<
   allowReordering,
   basePath,
   renderViewContent,
+  pagination,
 }: DataTableProps<TData, TValue>) {
   const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
   const [targetRowIndex, setTargetRowIndex] = useState<number | null>(null);
@@ -298,12 +300,19 @@ export function DataTable<
             </TableBody>
           </Table>
         </div>
-
-        <Pagination
+        {
+          pagination && (
+            <Pagination
           currentPage={pageNumber}
           totalPages={totalPages}
           basePath={basePath}
-        />
+          hasNext={pagination.has_next}
+          hasPrevious={pagination.has_previous}
+          />
+          )
+        }
+
+        
       </Card>
 
     </>

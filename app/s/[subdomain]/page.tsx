@@ -3,16 +3,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { use } from 'react'
 import { UserAuthForm } from '@/components/custom-forms/user-auth-form'
+import { useSession } from 'next-auth/react'
 
-export default function TenantPage({ params }: { params: Promise<{ domain: string }> }) {
+export default function TenantPage({ params }: { params: Promise<{ subdomain: string }> }) {
   const resolvedParams = use(params)
-  
+  const { data: session } = useSession();
+  console.log("session",session);  
 
   return (
     <div className="min-h-screen flex items-center justify-center" >
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl text-center">Welcome to {resolvedParams.domain}</CardTitle>
+          <CardTitle className="text-2xl text-center">Welcome to {resolvedParams.subdomain}</CardTitle>
           <p className="text-center text-muted-foreground">Enter your credentials to access your account</p>
         </CardHeader>
         <CardContent>

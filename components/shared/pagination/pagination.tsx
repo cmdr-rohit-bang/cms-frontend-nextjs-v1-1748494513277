@@ -4,24 +4,23 @@ import Link from "next/link";
 interface PaginationProps {
     currentPage: number;
     totalPages: number;
+    hasNext: boolean;
+    hasPrevious: boolean;
     basePath?: string;
 }
 
-const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, basePath }) => {
-    const prevPage = currentPage > 1 ? currentPage - 1 : null;
-    const nextPage = currentPage < totalPages ? currentPage + 1 : null;
-
+const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, hasNext, hasPrevious, basePath }) => {
     if (totalPages <= 1) return null;
 
     return (
         <div className="pt-10 pb-3">
             <div className="flex justify-center items-center gap-2">
-                {prevPage && (
+                {hasPrevious && (
                     <Button 
                         variant="outline"
                         asChild
                     >
-                        <Link href={`${basePath}?page=${prevPage}`}>Previous</Link>
+                        <Link href={`${basePath}?page=${currentPage - 1}`}>Previous</Link>
                     </Button>
                 )}
 
@@ -43,12 +42,12 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, basePa
                     );
                 })}
 
-                {nextPage && (
+                {hasNext && (
                     <Button 
                         variant="outline"
                         asChild
                     >
-                        <Link href={`${basePath}?page=${nextPage}`}>Next</Link>
+                        <Link href={`${basePath}?page=${currentPage + 1}`}>Next</Link>
                     </Button>
                 )}
             </div>
