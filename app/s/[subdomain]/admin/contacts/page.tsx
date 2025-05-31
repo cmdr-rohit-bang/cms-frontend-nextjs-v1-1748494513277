@@ -7,6 +7,7 @@ import { Column } from "@/types/types";
 import { DataTable } from "@/components/shared/data-table/data-table";
 import { Contact as ContactType } from "@/types/types";
 import { fetchData } from "@/app/actions";
+import { useSession } from "next-auth/react";
 
 export default function ContactsPage() {
   const router = useRouter();
@@ -16,10 +17,11 @@ export default function ContactsPage() {
   const [totalPages, setTotalPages] = useState(1);
   const currentPage = searchParams.get("page") || "1";
   const pageNumber = parseInt(currentPage, 10) || 1;
-
+  const  {data: session} = useSession()
+  console.log("session",session)
   useEffect(() => {
     const getData = async () => {
-      const data = await fetchData("/admin/contacts") as ContactType[];
+      const data = await fetchData("/api/contacts") as ContactType[];
       setData(data);
       setLoading(false);
     };
