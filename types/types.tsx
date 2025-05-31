@@ -25,19 +25,23 @@ export interface Tenants {
 }
 
 export interface Pagination {
-  current_page: number;
-  total_pages: number;
-  total_items: number;
-  items_per_page: number;
+  
+  total_pages?: number;
   has_next: boolean;
   has_previous: boolean;
 }
 
 export interface Contact {
+  order_number: number;
   id: string;
-  firstName: string;
-  lastName: string;
+  name: string;
   email: string;
+  phone: string;
+  company: string;
+  address: string;
+  tags: string[];
+  notes: string;
+  custom_fields: Record<string, string>;
 }
 
 export interface Admin {

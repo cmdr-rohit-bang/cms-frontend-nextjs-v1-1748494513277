@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import { DataTable } from "@/components/shared/data-table/data-table";
 import { Column, Pagination, Tenants } from "@/types/types";
 import Link from "next/link";
@@ -9,36 +8,52 @@ import { TenantsStatusModal } from "@/components/models/tenants-status-modal";
 import { toast } from "sonner";
 
 export default function TenantsPage() {
-  const searchParams = useSearchParams();
   const [data, setData] = useState<Tenants[]>([]);
   const [loading, setLoading] = useState(true);
-  const [pagination, setPagination] = useState<Pagination>({
-    current_page: 1,
-    total_pages: 1,
-    total_items: 0,
-    items_per_page: 10,
-    has_next: false,
-    has_previous: false
-  });
-  const currentPage = searchParams.get("page") || "1";
-  const pageNumber = parseInt(currentPage, 10) || 1;
-
-  // New state for popup
   const [isPopupOpen, setIsPopupOpen] = useState(false);
-  const [actionType, setActionType] = useState<"activate" | "deactivate" | null>(null);
+  const [actionType, setActionType] = useState<
+    "activate" | "deactivate" | null
+  >(null);
   const [selectedUserId, setSelectedUserId] = useState<number | null>(null);
 
-  const getData = async () => {
-      const data = await fetchData("/admin/tenants") as {tenants: Tenants [], pagination: Pagination};
-      console.log("data",data);
-      setData(data.tenants);
-      setPagination(data.pagination);
+  const [totalPages, setTotalPages] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const fetchTenants = async (
+    page: number = currentPage,
+    limit: number = pageSize,
+    search: string = searchQuery
+  ) => {
+    setLoading(true);
+    try {
+      // Update your API call to include pagination parameters
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        ...(search && { search }),
+      });
+
+      const response = (await fetchData(
+        `/admin/tenants?${params.toString()}`
+      )) as {
+        data: Tenants[];
+        pagination: Pagination;
+      };
+
+      setData(response.data || (response.data as Tenants[])); // Handle both formats
+      setTotalPages(response.pagination?.total_pages || 1);
+    } catch (error) {
+      console.error("Error fetching contacts:", error);
+    } finally {
       setLoading(false);
+    }
   };
-  
-    useEffect(() => {
-    getData();
-    
+
+  // Initial load
+  useEffect(() => {
+    fetchTenants();
   }, []);
 
   const handleOpenPopup = (type: "activate" | "deactivate", userId: number) => {
@@ -49,32 +64,44 @@ export default function TenantsPage() {
 
   const handleConfirm = async (reason: string) => {
     if (actionType && selectedUserId !== null) {
-      const apiEndpoint = actionType === "activate" ? `/admin/tenants/${selectedUserId}/activate` : `/admin/tenants/${selectedUserId}/suspend`;
-      const result = await changeStatus(apiEndpoint, { reason: reason }) as any;
-      if(result.status === "success") {
+      const apiEndpoint =
+        actionType === "activate"
+          ? `/admin/tenants/${selectedUserId}/activate`
+          : `/admin/tenants/${selectedUserId}/suspend`;
+      const result = (await changeStatus(apiEndpoint, {
+        reason: reason,
+      })) as any;
+      if (result.status === "success") {
         toast.success(result.message);
-        getData();
+        fetchTenants();
       } else {
         toast.error(result.message);
       }
       // Close the popup and reset state
       setIsPopupOpen(false);
       setSelectedUserId(null);
-      getData();
+      fetchTenants();
       // Optionally, refresh data here
     }
   };
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    fetchTenants(page, pageSize, searchQuery);
+  };
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageSize(newPageSize);
+    setCurrentPage(1); // Reset to first page when changing page size
+    fetchTenants(1, newPageSize, searchQuery);
+  };
+
 
   const columns: Column[] = [
     {
       id: "company_name",
       accessorKey: "company_name",
       header: "Company Name",
-      cell: ({ row }: { row: any }) => (
-        <span>
-          {row.original.company_name}
-        </span>
-      ),
+      cell: ({ row }: { row: any }) => <span>{row.original.company_name}</span>,
     },
     {
       id: "admin_name",
@@ -132,7 +159,7 @@ export default function TenantsPage() {
       cell: ({ row }: { row: any }) => {
         return (
           <Link
-          className="underline"
+            className="underline"
             href={`http://${row.original.subdomain}.${process.env.NEXT_PUBLIC_DOMIAN_URL}`}
             target="_blank"
           >
@@ -141,7 +168,6 @@ export default function TenantsPage() {
         );
       },
     },
-    
   ];
 
   return (
@@ -151,22 +177,31 @@ export default function TenantsPage() {
         columns={columns}
         data={data}
         loading={loading}
-        pageNumber={pageNumber}
-        totalPages={pagination.total_pages}
-        basePath="/admin/tenants"
-        pagination={pagination}
+
+        pageNumber={currentPage}
+        totalPages={totalPages}
+        pageSize={pageSize}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
+        pagination={{
+          has_next: currentPage < totalPages,
+          has_previous: currentPage > 1,
+        }}
       />
       <TenantsStatusModal
         isOpen={isPopupOpen}
         onClose={() => setIsPopupOpen(false)}
         onConfirm={handleConfirm}
-        title={actionType === "activate" ? "Activate Tenant" : "Deactivate Tenant"}
-        description={`Are you sure you want to ${actionType === "activate" ? "activate" : "deactivate"} this tenant? This action cannot be undone.`}
+        title={
+          actionType === "activate" ? "Activate Tenant" : "Deactivate Tenant"
+        }
+        description={`Are you sure you want to ${
+          actionType === "activate" ? "activate" : "deactivate"
+        } this tenant? This action cannot be undone.`}
         confirmLabel="Confirm"
         cancelLabel="Cancel"
         isLoading={loading}
       />
-      
     </div>
   );
 }

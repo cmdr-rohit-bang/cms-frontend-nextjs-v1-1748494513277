@@ -15,7 +15,7 @@ export default function UsersPage() {
 
   const onSubmit = async (data: any) => {
     setIsPending(true);
-    const result = await editData(`/admin/tickets/${params.id}`, data) as any;
+    const result = await editData(`/api/tickets/${params.id}`, data) as any;
 
     if (result?.status === "success") {
       toast.success(result.message, { position: "top-right" });

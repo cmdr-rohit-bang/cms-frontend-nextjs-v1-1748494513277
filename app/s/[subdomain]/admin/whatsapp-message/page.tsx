@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { DataTable } from "@/components/shared/data-table/data-table";
-import { Column } from "@/types/types";
+import { Column, Pagination } from "@/types/types";
 import { WhatsappMessage } from "@/types/types";
 import { fetchData } from "@/app/actions";
 import { EyeIcon } from "lucide-react";
@@ -16,8 +16,9 @@ export default function WhatsappMessagePage() {
   const [data, setData] = useState<WhatsappMessage[]>([]);
   const [loading, setLoading] = useState(false);
   const [totalPages, setTotalPages] = useState(1);
-  const currentPage = searchParams.get("page") || "1";
-  const pageNumber = parseInt(currentPage, 10) || 1;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isSendPopupOpen, setIsSendPopupOpen] = useState(false);
@@ -33,15 +34,41 @@ export default function WhatsappMessagePage() {
     setSelectedMessageId("");
   };
 
-  useEffect(() => {
-    const getData = async () => {
-      const data = await fetchData("/admin/whatsapp-message") as WhatsappMessage[];
-      setData(data);
-      setLoading(false);
-    };
-    getData();
-  }, []);
 
+
+  const fetchTenants = async (
+    page: number = currentPage,
+    limit: number = pageSize,
+    search: string = searchQuery
+  ) => {
+    setLoading(true);
+    try {
+      // Update your API call to include pagination parameters
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        ...(search && { search }),
+      });
+
+      const response = (await fetchData(
+        `api/whatsapp/messages?${params.toString()}`
+      )) as {
+        data: WhatsappMessage[];
+        pagination: Pagination;
+      };
+
+      setData(response.data || (response.data as WhatsappMessage[])); // Handle both formats
+      setTotalPages(response.pagination?.total_pages || 1);
+    } catch (error) {
+      console.error("Error fetching contacts:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTenants()
+  }, []);
 
   const columns: Column[] = [
     {
@@ -92,6 +119,18 @@ export default function WhatsappMessagePage() {
     }
   ];
 
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    fetchTenants(page, pageSize, searchQuery);
+  };
+
+  const handlePageSizeChange = (newPageSize: number) => {
+    setPageSize(newPageSize);
+    setCurrentPage(1); // Reset to first page when changing page size
+    fetchTenants(1, newPageSize, searchQuery);
+  };
+
+
   return (
     <div className="space-y-6 p-4">
       <DataTable
@@ -100,9 +139,15 @@ export default function WhatsappMessagePage() {
         onAdd={() => setIsSendPopupOpen(true)}
         data={data}
         loading={loading}
-        pageNumber={pageNumber}
+        pageNumber={currentPage}
         totalPages={totalPages}
-        basePath="/admin/whatsapp-message"
+        pageSize={pageSize}
+        onPageChange={handlePageChange}
+        onPageSizeChange={handlePageSizeChange}
+        pagination={{
+          has_next: currentPage < totalPages,
+          has_previous: currentPage > 1,
+        }}
       />
       <WhatsappChatViewModel
         isOpen={isPopupOpen}

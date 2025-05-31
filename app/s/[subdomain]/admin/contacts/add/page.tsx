@@ -25,8 +25,7 @@ export default function UsersPage() {
   const onSubmit = async (data: any) => {
     setIsPending(true);
     const result = await addData("/api/contacts", data) as any;
-
-    if (result?.status === "success") {
+    if (result?.success === true) {
       toast.success(result.message, { position: "top-right" });
       router.push("/admin/contacts");
     } else {

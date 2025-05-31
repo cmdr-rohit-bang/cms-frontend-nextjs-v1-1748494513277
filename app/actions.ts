@@ -31,7 +31,7 @@ export const fetchData = async (endpoint: string) => {
 export const addData = async (endpoint: string, data: any) => {
   try {
     const response = await apiClient.post(endpoint, data);
-    return response.data;
+    return response;
   } catch (error) {
     console.error("Error adding data:", error);
     throw error;
@@ -67,3 +67,49 @@ export const changeStatus = async (endpoint: string, data: any) => {
     throw error;
   }
 };
+
+  export const exportData = async (endpoint: string) => {
+    const format = 'csv';
+    try {
+      const response:any = await apiClient.get(`${endpoint}`, {
+      responseType: 'blob', // Important for file downloads
+    });
+    const blob = new Blob([response.data], {
+      type: format === 'csv' ? 'text/csv' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    });
+    
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `contacts-${new Date().toISOString().split('T')[0]}.${format}`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    
+    return { success: true };
+    } catch (error) {
+      console.error("Error exporting data:", error);
+      throw error;
+    }
+  };
+
+  export const importData = async (endpoint: string, data: any) => {
+    try {
+      const response = await apiClient.post(endpoint, data);
+      return response.data;
+    } catch (error) {
+      console.error("Error exporting data:", error);
+      throw error;
+    }
+  };
+
+  export const deleteBulkData = async (endpoint: string, data: any) => {
+    try {
+      const response = await apiClient.post(endpoint, data);
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting data:", error);
+      throw error;
+    }
+  };

@@ -17,7 +17,7 @@ export default function TicketsPage() {
 
   useEffect(() => {
     const getData = async () => {
-      const data = await fetchData("/admin/tickets") as TicketType[];
+      const data = await fetchData("/api/tickets") as TicketType[];
       setData(data);
       setLoading(false);
     };

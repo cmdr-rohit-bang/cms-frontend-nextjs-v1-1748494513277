@@ -14,6 +14,7 @@ const SearchInput = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
+    if (searchQuery.trim().length === 0) return;
     e.preventDefault();
     setIsSubmitting(true);
     onSearch && onSearch(searchQuery);
@@ -35,7 +36,13 @@ const SearchInput = ({
         className="max-w-[400px] w-[400px]  px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-primary-500"
         placeholder="Search"
         value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
+        onChange={(e) => {
+          setSearchQuery(e.target.value);
+          if (e.target.value.trim().length === 0) {
+            onSearch?.(""); 
+            setIsSubmitted(false);
+          }
+        }}
       />
       <Button 
         type="submit" 
@@ -45,13 +52,13 @@ const SearchInput = ({
       >
         Submit
       </Button>
-      {isSubmitted && (
+      {isSubmitted  && (
         <Button
           type="button"
           className="ml-2"
           onClick={handleClearClick}
         >
-          Clear
+          Show All
         </Button>
       )}
     </div>

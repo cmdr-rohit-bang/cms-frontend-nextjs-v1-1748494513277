@@ -412,9 +412,9 @@ const contactSchema = z.object({
   email: z.string().email("Invalid email address"),
   phone: z.string().min(1, "Phone is required"),
   company: z.string().min(1, "Company is required"),
-  address: z.string().min(1, "Address is required"),
+  address: z.string().optional(),
   tags: z.array(z.string()).min(1, "At least one tag is required"),
-  notes: z.string().min(1, "Notes are required"),
+  notes: z.string().optional(),
   custom_fields: customFieldSchema,
 });
 
@@ -423,7 +423,7 @@ const ContactForm = ({
   defaultValue,
   buttonText,
 }: {
-  onSubmit: (data: ContactValues) => void;
+  onSubmit: (data: any) => void;
   defaultValue: ContactValues;
   buttonText: string;
 }) => {
@@ -466,13 +466,18 @@ const ContactForm = ({
   // Handle form submission
   const handleSubmit = (data: ContactValues) => {
     // Filter out empty custom fields
-    const filteredCustomFields = data.custom_fields.filter(
-      (field) => field.key?.trim() && field.value?.trim()
-    );
+    const objectifiedCustomFields = data.custom_fields.reduce((acc, field) => {
+      const key = field.key?.trim();
+      const value = field.value?.trim();
+      if (key && value) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {} as Record<string, string>);
 
     const finalData = {
       ...data,
-      custom_fields: filteredCustomFields,
+      custom_fields: objectifiedCustomFields,
     };
 
     onSubmit(finalData);
