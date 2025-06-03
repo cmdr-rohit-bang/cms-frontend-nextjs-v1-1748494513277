@@ -1,27 +1,36 @@
 "use client";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { useParams, useRouter } from "next/navigation";
 import TicketForm from "@/components/custom-forms/ticket-form";
-import { editData } from "@/app/actions";
+import { editData, fetchData } from "@/app/actions";
+import { TicketType } from "@/types/types";
 
 export default function UsersPage() {
   const params = useParams();
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);  
-  const [data, setData] = useState<any|[]>([]);
+  const [data, setData] = useState<any|{}>({});
+
+  useEffect(() => {
+    const fetchDataById = async () => {
+      const data = await fetchData(`/api/tickets/${params.id}`) as any;
+      console.log("data",data.data);    
+      setData(data.data); 
+    };
+    fetchDataById();
+  }, [params.id]);
 
   const onSubmit = async (data: any) => {
     setIsPending(true);
     const result = await editData(`/api/tickets/${params.id}`, data) as any;
-
-    if (result?.status === "success") {
+    if (result.success === true) {
       toast.success(result.message, { position: "top-right" });
       router.push("/admin/tickets");
     } else {
-      toast.error(result.message, { position: "top-right" });
+      toast.error(result.data.message, { position: "top-right" });
     }
     setIsPending(false);
   };
@@ -29,12 +38,9 @@ export default function UsersPage() {
   const defaultValue = {
     subject: data?.subject ?? "",
     description: data?.description ?? "",
-    status: data?.status ?? "",
     priority: data?.priority ?? "",
     category: data?.category ?? "",
     assigned_to: data?.assigned_to ?? "",
-    contact_email: data?.contact_email ?? "",
-    contact_phone: data?.contact_phone ?? "",
   };
 
   if (!data) {
@@ -55,7 +61,7 @@ export default function UsersPage() {
       <Card>
         <CardContent>
           <div className="mb-4 px-4 py-8 w-0 md:w-10/12">
-          <TicketForm onSubmit={onSubmit} defaultValue={defaultValue} buttonText="Update" />         
+          <TicketForm onSubmit={onSubmit} defaultValue={defaultValue} buttonText="Update" isLoading={isPending} />         
           </div>
         </CardContent>
       </Card>

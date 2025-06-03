@@ -1,5 +1,5 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -28,29 +28,19 @@ import { SelectValue } from "../ui/select";
 import { SelectContent } from "../ui/select";
 import { Textarea } from "../ui/textarea";
 import Link from "next/link";
+import { fetchData } from "@/app/actions";
+import { Pagination } from "@/types/types";
+import { Contact as ContactType } from "@/types/types";
 
 const taskSchema = z.object({
   subject: z.string().min(1, "Subject is required"),
   description: z.string().min(1, "Description is required"),
-  status: z.string().min(1, "Status is required"),
-  priority: z.string().min(1, "Priority is required"),
-  category: z.string().min(1, "Category is required"),
-  assigned_to: z.string().min(1, "Assigned To is required"),
-  contact_email: z.string().email("Invalid email address"),
-  contact_phone: z.string().min(1, "Contact phone is required"),
+  priority: z.string().optional(),
+  category: z.string().optional(),
+  status: z.string().optional(),
+  assigned_to: z.string().optional(),
 });
 
-const languages = [
-  { label: "English", value: "en" },
-  { label: "French", value: "fr" },
-  { label: "German", value: "de" },
-  { label: "Spanish", value: "es" },
-  { label: "Portuguese", value: "pt" },
-  { label: "Russian", value: "ru" },
-  { label: "Japanese", value: "ja" },
-  { label: "Korean", value: "ko" },
-  { label: "Chinese", value: "zh" },
-] as const;
 
 type TicketValues = z.infer<typeof taskSchema>;
 
@@ -58,15 +48,40 @@ const TicketForm = ({
   onSubmit,
   defaultValue,
   buttonText,
+  isLoading,
 }: {
   onSubmit: (data: TicketValues) => void;
   defaultValue: TicketValues;
   buttonText: string;
+  isLoading: boolean;
 }) => {
   const form = useForm<TicketValues>({
     resolver: zodResolver(taskSchema),
     defaultValues: defaultValue,
   });
+
+  const [contacts, setContacts] = useState<{ label: string; value: string }[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    form.reset(defaultValue);
+  }, [defaultValue, form]);
+
+  useEffect(() => {
+    const fetchContactData = async () => {
+      const res = await fetchData(`/api/contacts?search=${searchQuery}`) as {
+        data: ContactType[];
+        pagination: Pagination;
+      };;
+      const resData = res?.data;
+      const formattedContacts = resData.map((contact: any) => ({
+        label: contact.name,
+        value: contact.id,
+      }));  
+      setContacts(formattedContacts);
+    };
+    fetchContactData();
+  }, [searchQuery]);
 
   return (
     <FormProvider {...form}>
@@ -83,46 +98,6 @@ const TicketForm = ({
                   <Input
                     placeholder="Brief description of the issue"
                     {...field}
-                    className="transition-all"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Contact Email */}
-          <FormField
-            control={form.control}
-            name="contact_email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Contact Email</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="you@example.com"
-                    {...field}
-                    type="email"
-                    className="transition-all"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Contact Phone */}
-          <FormField
-            control={form.control}
-            name="contact_phone"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Contact Phone</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="+1 234 567 890"
-                    {...field}
-                    type="tel"
                     className="transition-all"
                   />
                 </FormControl>
@@ -150,8 +125,7 @@ const TicketForm = ({
                         )}
                       >
                         {field.value
-                          ? languages.find((l) => l.value === field.value)
-                              ?.label
+                          ? contacts.find((c) => c.value === field.value)?.label
                           : "Select a person"}
                         <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
                       </Button>
@@ -159,23 +133,26 @@ const TicketForm = ({
                   </PopoverTrigger>
                   <PopoverContent className="p-0">
                     <Command>
-                      <CommandInput placeholder="Search team member..." />
+                      <CommandInput
+                        placeholder="Search team member..."
+                        onValueChange={setSearchQuery}
+                      />
                       <CommandList>
                         <CommandEmpty>No match found.</CommandEmpty>
                         <CommandGroup>
-                          {languages.map((language) => (
+                          {contacts.map((contact) => (
                             <CommandItem
-                              key={language.value}
-                              value={language.label}
+                              key={contact.value}
+                              value={contact.label}
                               onSelect={() =>
-                                form.setValue("assigned_to", language.value)
+                                form.setValue("assigned_to", contact.value)
                               }
                             >
-                              {language.label}
+                              {contact.label}
                               <Check
                                 className={cn(
                                   "ml-auto",
-                                  language.value === field.value
+                                  contact.value === field.value
                                     ? "opacity-100"
                                     : "opacity-0"
                                 )}
@@ -213,6 +190,7 @@ const TicketForm = ({
         />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 py-6 ">
+          {/* Priority */}
           <FormField
             control={form.control}
             name="status"
@@ -229,18 +207,17 @@ const TicketForm = ({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="Open">Open</SelectItem>
-                    <SelectItem value="In Progress">In Progress</SelectItem>
-                    <SelectItem value="Resolved">Resolved</SelectItem>
-                    <SelectItem value="Closed">Closed</SelectItem>
+                    <SelectItem value="open">Open</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="resolved">Resolved</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="closed">Closed</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
-
-          {/* Priority */}
           <FormField
             control={form.control}
             name="priority"
@@ -257,10 +234,10 @@ const TicketForm = ({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="Low">Low</SelectItem>
-                    <SelectItem value="Medium">Medium</SelectItem>
-                    <SelectItem value="High">High</SelectItem>
-                    <SelectItem value="Urgent">Urgent</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -285,13 +262,13 @@ const TicketForm = ({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="General">General</SelectItem>
-                    <SelectItem value="Technical">Technical</SelectItem>
-                    <SelectItem value="Sales">Sales</SelectItem>
-                    <SelectItem value="Support">Support</SelectItem>
-                    <SelectItem value="Billing">Billing</SelectItem>
-                    <SelectItem value="Accounting">Accounting</SelectItem>
-                    <SelectItem value="Other">Other</SelectItem>
+                    <SelectItem value="general">General</SelectItem>
+                    <SelectItem value="technical">Technical</SelectItem>
+                    <SelectItem value="sales">Sales</SelectItem>
+                    <SelectItem value="support">Support</SelectItem>
+                    <SelectItem value="billing">Billing</SelectItem>
+                    <SelectItem value="accounting">Accounting</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -307,9 +284,9 @@ const TicketForm = ({
           <Button
             type="submit"
             className="bg-blue-600 hover:bg-blue-700 text-white transition"
-            disabled={form.formState.isSubmitting}
+            disabled={isLoading}
           >
-            {form.formState.isSubmitting ? (
+            {isLoading ? (
               <span className="flex items-center gap-2">
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 {buttonText}...

@@ -14,9 +14,9 @@ export default function UsersPage() {
   const onSubmit = async (data: any) => {
     setIsPending(true);
     const result = await addData("/api/tickets", data) as any;
-
-    if (result?.status === "success") {
-      toast.success(result.message, { position: "top-right" });
+     
+    if (result.data.success === true) {
+      toast.success(result.data.message, { position: "top-right" });
       router.push("/admin/tickets");
     } else {
       toast.error(result.message, { position: "top-right" });
@@ -27,12 +27,9 @@ export default function UsersPage() {
   const defaultValue = {
     subject: "",
     description: "",
-    status: "open",
     priority: "",
     category: "",
-    assigned_to: "",
-    contact_email: "",
-    contact_phone: "",
+    assigned_to: "", 
   };
 
   return (
@@ -46,7 +43,7 @@ export default function UsersPage() {
       <Card>
         <CardContent>
           <div className="mb-4 px-4 py-8 w-0 md:w-10/12">
-            <TicketForm onSubmit={onSubmit} defaultValue={defaultValue}  buttonText="Save"  />
+            <TicketForm onSubmit={onSubmit} defaultValue={defaultValue}  buttonText="Save"  isLoading={isPending} />
           </div>
         </CardContent>
       </Card>

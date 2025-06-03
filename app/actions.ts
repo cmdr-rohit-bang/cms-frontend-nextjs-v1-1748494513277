@@ -40,7 +40,7 @@ export const addData = async (endpoint: string, data: any) => {
 
 export const editData = async (endpoint: string, data: any) => {
   try {
-    const response = await apiClient.put(endpoint, data);
+    const response = await apiClient.patch(endpoint, data);
     return response.data;
   } catch (error) {
     console.error("Error editing data:", error);
@@ -105,6 +105,16 @@ export const changeStatus = async (endpoint: string, data: any) => {
   };
 
   export const deleteBulkData = async (endpoint: string, data: any) => {
+    try {
+      const response = await apiClient.post(endpoint, data);
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting data:", error);
+      throw error;
+    }
+  };
+
+  export const addTagsAndRemoveTags = async (endpoint: string, data: any) => {
     try {
       const response = await apiClient.post(endpoint, data);
       return response.data;

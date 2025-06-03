@@ -1,9 +1,9 @@
 "use client";
 import React, { Suspense, useState } from "react";
-import { Toaster } from "@/components/ui/toaster";
 import Sidebar from "@/components/common/sidebar";
 import AdminNav from "@/components/common/admin-nav";
 import { useSession } from "next-auth/react";
+import { Toaster } from "sonner";
 
 interface DashboardLayoutProps {
   children?: React.ReactNode;

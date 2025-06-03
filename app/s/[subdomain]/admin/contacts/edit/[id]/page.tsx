@@ -1,25 +1,33 @@
 "use client";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
-import {  useState, useTransition } from "react";
+import {  useEffect, useState, useTransition } from "react";
 
 import { useParams, useRouter } from "next/navigation";
 import ContactForm from "@/components/custom-forms/contacts-form";
-import { editData } from "@/app/actions";
+import { editData, fetchData } from "@/app/actions";
 
 
 export default function UsersPage() {
   const params = useParams();
   const router = useRouter();
   const [isPending, setIsPending] = useState(false);
-  const [data, setData] = useState<any|[]>([]);
+  const [data, setData] = useState<any|{}>({});
 
+  useEffect(() => {
+    const fetchDataById = async () => {
+        const data = await fetchData(`/api/contacts/${params.id}`) as any;
+      console.log("data",data.data);    
+      setData(data.data); 
+    };
+    fetchDataById();
+  }, [params.id]);
 
   const onSubmit = async (data: any) => {
     setIsPending(true);
     const result = await editData(`/api/contacts/${params.id}`, data) as any;
 
-    if (result?.status === "success") {
+    if (result.success === true) {
       toast.success(result.message, { position: "top-right" });
       router.push("/admin/contacts");
     } else {
@@ -57,7 +65,7 @@ export default function UsersPage() {
       <Card>
         <CardContent>
           <div className="mb-4 px-4 py-8 w-0 md:w-10/12">
-            <ContactForm onSubmit={onSubmit} defaultValue={defaultValue} buttonText="Update" />
+            <ContactForm onSubmit={onSubmit} defaultValue={defaultValue} buttonText="Update" isLoading={isPending} />
           </div>
         </CardContent>
       </Card>

@@ -4,10 +4,21 @@ import { useRouter } from "next/navigation";
 import { Column, Pagination } from "@/types/types";
 import { DataTable } from "@/components/shared/data-table/data-table";
 import { Contact as ContactType } from "@/types/types";
-import { deleteBulkData, deleteData, exportData, fetchData, importData } from "@/app/actions";
+import {
+  addTagsAndRemoveTags,
+  deleteBulkData,
+  deleteData,
+  exportData,
+  fetchData,
+  importData,
+} from "@/app/actions";
 import { ContactsImportModal } from "@/components/models/contacts-import-modal";
 import { toast } from "sonner";
 import { DeleteConfirmationDialog } from "@/components/models/delete-modal";
+import { TagsModal } from "@/components/models/tags-modal";
+import { BaseModal } from "@/components/models/base-modal";
+import CustomFields from "@/components/custom-forms/custom-fields-form";
+import { set } from "date-fns";
 
 export default function ContactsPage() {
   const router = useRouter();
@@ -24,6 +35,16 @@ export default function ContactsPage() {
   const [deleteMode, setDeleteMode] = useState<"single" | "multiple" | null>(
     null
   );
+  const [isTagsModalOpen, setIsTagsModalOpen] = useState(false);
+  const [tagsModalMode, setTagsModalMode] = useState<"add" | "remove" | null>(
+    null
+  );
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isCustomFieldModalOpen, setIsCustomFieldModalOpen] = useState(false); 
+  const [customFieldsId, setCustomFieldsId] = useState<string[]>([]);
+  const [customFields, setCustomFields] = useState([
+    {  key: "", value: "" },
+  ]); 
 
   const fetchContacts = async (
     page: number = currentPage,
@@ -55,7 +76,6 @@ export default function ContactsPage() {
     }
   };
 
-  // Initial load
   useEffect(() => {
     fetchContacts();
   }, []);
@@ -95,7 +115,8 @@ export default function ContactsPage() {
     formData.append("file", contacts);
     try {
       const res = await importData("/api/contacts/import", formData);
-      console.log("Import response:", res);
+      fetchContacts(currentPage, pageSize, searchQuery);
+      toast.success("Contacts imported successfully");
     } catch (error) {
       console.error("Import failed:", error);
     }
@@ -117,33 +138,121 @@ export default function ContactsPage() {
     if (deleteMode === "single" && itemToDelete) {
       try {
         await deleteData(`/api/contacts/${itemToDelete.id}`);
-        setData(prev => prev.filter(c => c.id !== itemToDelete.id));
+        setData((prev) => prev.filter((c) => c.id !== itemToDelete.id));
         toast.success("Contact deleted successfully");
+        fetchContacts(currentPage, pageSize, searchQuery);
       } catch (error) {
         console.error("Error deleting contact:", error);
         toast.error("Failed to delete contact");
       }
     }
-  
+
     if (deleteMode === "multiple" && idsToDelete) {
-      console.log("idsToDelete", idsToDelete);
+      
       try {
-         await deleteBulkData(`/api/contacts/bulk-action`, {
-          "contact_ids": idsToDelete,
-          "action": "delete",
+       const res:any = await deleteBulkData(`/api/contacts/bulk-action`, {
+          contact_ids: idsToDelete,
+          action: "delete",
         });
-        setData(prev => prev.filter(c => !idsToDelete.includes(c.id)));
-        toast.success(`${idsToDelete.length} contact(s) deleted successfully`);
+        setData((prev) => prev.filter((c) => !idsToDelete.includes(c.id)));
+        if(res.success === true){
+          toast.success(res.message);
+          fetchContacts(currentPage, pageSize, searchQuery);
+        }
+        else{
+          toast.error(res.message);
+        }
       } catch (error) {
         console.error("Error deleting contacts:", error);
         toast.error("Failed to delete contacts");
       }
     }
-  
+
     setIsDeleteDialogOpen(false);
     setItemToDelete(null);
     setIdsToDelete(null);
     setDeleteMode(null);
+  };
+
+  const handleAddTags = (ids: string[]) => {
+    setTagsModalMode("add");
+    setIsTagsModalOpen(true);
+    setSelectedIds(ids);
+    fetchContacts(currentPage, pageSize, searchQuery);
+  };
+
+  const handleTagsConfirm = async (ids: string[], tags: string[]) => {
+    setIsTagsModalOpen(false);
+    let res:any 
+    tagsModalMode === "add"
+      ? res = await addTagsAndRemoveTags(`/api/contacts/bulk-action`, {
+          contact_ids: ids,
+          action: "add_tags",
+          tags: tags,
+        })
+        
+      : res=await addTagsAndRemoveTags(`/api/contacts/bulk-action`, {
+          contact_ids: ids,
+          action: "remove_tags",
+          tags: tags,
+        });
+
+        if(res.success === true){
+          toast.success(res.message);
+          fetchContacts(currentPage, pageSize, searchQuery);
+        }
+        else{
+          toast.error("Tags could not be added");
+        }
+   
+   
+  };
+
+  const handleRemoveTags = (ids: string[]) => {
+    console.log("remove-tags", ids);
+    setTagsModalMode("remove");
+    setIsTagsModalOpen(true);
+    setSelectedIds(ids);
+    fetchContacts(currentPage, pageSize, searchQuery);
+  };
+
+  const handleAddCustomField = (ids: string[]) => {
+    console.log("add-custom-field", ids);
+      setCustomFieldsId(ids);
+    setIsCustomFieldModalOpen(true);
+    fetchContacts(currentPage, pageSize, searchQuery);
+  };
+
+  const handleAddCustomFieldConfirm = async () => {
+    if (customFields.length > 0) {
+      const objectifiedCustomFields = customFields.reduce((acc, field) => {
+        const key = field.key?.trim();
+        const value = field.value?.trim();
+        if (key && value) {
+          acc[key] = value;
+        }
+        return acc;
+      }, {} as Record<string, string>);
+
+      const jsonString = JSON.stringify(objectifiedCustomFields);
+      const jsonParse = JSON.parse(jsonString);
+      
+      const dataToSend = {
+        contact_ids: customFieldsId,
+        action: "update_fields",
+        fields: jsonParse,
+      };
+  
+      const res:any = await addTagsAndRemoveTags(`/api/contacts/bulk-action`, dataToSend);
+      if(res.success === true){
+        toast.success("Custom fields updated successfully");
+        fetchContacts(currentPage, pageSize, searchQuery);
+      }
+      else{
+        toast.error(res.message);
+      }
+      
+    }
   };
 
   const columns: Column[] = [
@@ -199,8 +308,35 @@ export default function ContactsPage() {
           has_previous: currentPage > 1,
         }}
         onDelete={openDeleteConfirmation}
-        onDeleteMultiple={openDeleteMultipleConfirmation}
-        allowSelection={true}
+        selection={{
+          enabled: true,
+          actions: [
+            {
+              id: "delete-users",
+              label: "Delete Users",
+              variant: "destructive",
+              showCount: true,
+              action: openDeleteMultipleConfirmation
+            },
+            {
+              id: "add-tags",
+              label: "Add Tags",
+              action: handleAddTags
+            },
+            {
+              id: "remove-tags",
+              label: "Remove Tags",
+              action: handleRemoveTags
+            },
+            {
+              id: "add-custom-field",
+              label: "Add Custom Field",
+              action: handleAddCustomField
+            },
+            
+          ]
+        }}  
+
       />
       <ContactsImportModal
         isOpen={isImportModalOpen}
@@ -214,20 +350,43 @@ export default function ContactsPage() {
           setItemToDelete(null);
           setIdsToDelete(null);
           setDeleteMode(null);
-      
         }}
         onConfirm={confirmDelete}
-        title={
-          deleteMode === "multiple"
-            ? "Delete Contacts"
-            : "Delete Contact"
-        }
+        title={deleteMode === "multiple" ? "Delete Contacts" : "Delete Contact"}
         description={
           deleteMode === "multiple"
             ? "Are you sure you want to delete these contacts? This action cannot be undone."
             : "Are you sure you want to delete this contact? This action cannot be undone."
         }
       />
+      <TagsModal
+        isOpen={isTagsModalOpen}
+        onClose={() => setIsTagsModalOpen(false)}
+        onConfirm={handleTagsConfirm}
+        mode={tagsModalMode || "add"}
+        selectedIds={selectedIds}
+        data={data}
+        availableTags={[
+          "partner",
+          "customer",
+          "prospect",
+          "vendor",
+          "important",
+        ]}
+        title={tagsModalMode === "add" ? "Add Tags" : "Remove Tags"}
+        description={
+          tagsModalMode === "add"
+            ? "Add tags to the selected contacts"
+            : "Remove tags from the selected contacts"
+        }
+        confirmLabel={tagsModalMode === "add" ? "Add" : "Remove"}
+        cancelLabel="Cancel"
+        isLoading={false}
+      />
+      <BaseModal onConfirm={handleAddCustomFieldConfirm} title="Add Custom Field" isOpen={isCustomFieldModalOpen} onClose={() => setIsCustomFieldModalOpen(false)}>
+      <CustomFields setCustomFields={setCustomFields} customFields={customFields} />
+        
+      </BaseModal>
     </div>
   );
 }

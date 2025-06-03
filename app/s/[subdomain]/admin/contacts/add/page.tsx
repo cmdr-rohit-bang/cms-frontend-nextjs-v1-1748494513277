@@ -5,7 +5,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import ContactForm from "@/components/custom-forms/contacts-form";
-import { addData } from "@/app/actions";
+import { addData, fetchData } from "@/app/actions";
 
 export default function UsersPage() {
   const router = useRouter();
@@ -25,11 +25,12 @@ export default function UsersPage() {
   const onSubmit = async (data: any) => {
     setIsPending(true);
     const result = await addData("/api/contacts", data) as any;
-    if (result?.success === true) {
-      toast.success(result.message, { position: "top-right" });
+    if (result?.data?.success === true) {
+
+      toast.success(result.data.message, { position: "top-right" });
       router.push("/admin/contacts");
     } else {
-      toast.error(result.message, { position: "top-right" });
+      toast.error(result.data.message, { position: "top-right" });
     }
     setIsPending(false);
   };
@@ -45,7 +46,7 @@ export default function UsersPage() {
       <Card>
         <CardContent>
           <div className="mb-4 px-4 py-8 w-0 md:w-10/12">
-              <ContactForm onSubmit={onSubmit} defaultValue={defaultValue} buttonText="Save" />            
+              <ContactForm onSubmit={onSubmit} defaultValue={defaultValue} buttonText="Save" isLoading={isPending} />            
           </div>
         </CardContent>
       </Card>

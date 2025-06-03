@@ -64,20 +64,19 @@ export interface User {
   admin:Admin;
 }
 export interface TicketType {
-  id?: string;
-  title: string;
-  details: string;
-  status: string;
+  id: string;
+  subject: string;
+  description: string;
   priority: string;
-  assignedToId: string;
-  product: string;
-  ticketCategoryId: string;
+  assigned_to: string;
+  category: string;
   userId: string;
   assignedToUser?: User;
   dueDate?: Date;
   contact?: Contact;
   createdAt: Date;
   updatedAt: Date;
+  tags: string[];
 }
 
 export interface WhatsappMessage {
