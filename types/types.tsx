@@ -59,6 +59,10 @@ export interface Admin {
 }
 
 export interface User {
+   id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
   access_token: string;
   order_number: number;
   admin:Admin;
@@ -72,11 +76,25 @@ export interface TicketType {
   category: string;
   userId: string;
   assignedToUser?: User;
-  dueDate?: Date;
+  due_date?: Date;
   contact?: Contact;
+  status:string;
   createdAt: Date;
   updatedAt: Date;
   tags: string[];
+}
+
+export interface Comment {
+  id: string;
+  ticket_id: string;
+  user_id: string;
+  message: string;
+  is_internal: boolean;
+  attachments: string[] | null;
+  sender_name: string | null;
+  sender_email: string | null;
+  created_at: string;
+  user: User;
 }
 
 export interface WhatsappMessage {

@@ -41,6 +41,8 @@ export default function UsersPage() {
     priority: data?.priority ?? "",
     category: data?.category ?? "",
     assigned_to: data?.assigned_to ?? "",
+    status:data?.status,
+    due_date: data?.due_date ? new Date(data.due_date) : new Date()
   };
 
   if (!data) {

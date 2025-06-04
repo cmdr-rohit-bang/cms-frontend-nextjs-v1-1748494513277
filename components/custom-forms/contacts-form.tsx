@@ -5,7 +5,7 @@ import { FormProvider, useForm, useFieldArray } from "react-hook-form";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Textarea } from "../ui/textarea";
-import { format } from "date-fns";
+
 import {
   FormField,
   FormItem,
@@ -27,7 +27,7 @@ import { cn } from "@/lib/utils";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { Calendar } from "../ui/calendar";
+
 
 type ContactValues = z.infer<typeof contactSchema>;
 
@@ -71,7 +71,6 @@ const contactSchema = z.object({
   tags: z.array(z.string()).min(1, "At least one tag is required"),
   notes: z.string().optional(),
   custom_fields: customFieldSchema,
-  due_date: z.date().optional(),
 });
 
 const ContactForm = ({
@@ -115,7 +114,7 @@ const ContactForm = ({
     if (fields.length > 1) {
       remove(index);
     } else {
-      // Clear the last field instead of removing it
+      
       form.setValue(`custom_fields.${index}.key`, "");
       form.setValue(`custom_fields.${index}.value`, "");
     }
@@ -142,7 +141,18 @@ const ContactForm = ({
   };
 
   useEffect(() => {
-    form.reset(defaultValue);
+    const initialCustomFields = defaultValue.custom_fields && 
+    typeof defaultValue.custom_fields === 'object'
+    ? Object.entries(defaultValue.custom_fields).map(([key, value]) => ({
+        key,
+        value: value as string
+      }))
+    : [{ key: "", value: "" }];
+
+  form.reset({
+    ...defaultValue,
+    custom_fields: initialCustomFields
+  });
   }, [defaultValue, form]);
 
   return (
@@ -374,45 +384,7 @@ const ContactForm = ({
           )}
         />
 
-        <FormField
-          control={form.control}
-          name="due_date"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Due Date</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-[240px] pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field?.value}
-                    onSelect={field.onChange}
-                    disabled={(date) => date < new Date("1900-01-01")}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
 
         {/* Custom Fields */}
         <div>

@@ -6,43 +6,28 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 
-export const convertToCSV = (data: any[]) => {
-  const headers = [
-    "ID",
-    "Name",
-    "Email",
-    "Phone",
-    "Company",
-    "Address",
-    "Notes",
-    "Tags",
-    "Created At",
-    "Updated At",
-  ];
 
-  const rows = data.map((item) => [
-    item.id,
-    item.name,
-    item.email,
-    item.phone,
-    item.company,
-    item.address,
-    item.notes,
-    item.tags,
-    item.createdAt,
-    item.updatedAt,
-  ]);
+export const formatDate = (dateInput: string | Date) => {
+  const date = typeof dateInput === "string" ? new Date(dateInput) : dateInput;
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+  }).format(date);
+};
 
-  const csvContent = [
-    headers.join(","),
-    ...rows.map((row) =>
-      row
-        .map((field) =>
-          `"${(field ?? "").toString().replace(/"/g, '""')}"`
-        )
-        .join(",")
-    ),
-  ].join("\n");
 
-  return csvContent;
+// Add this to your existing utils file
+export const debounce = <T extends (...args: any[]) => any>(
+  func: T,
+  wait: number
+): ((...args: Parameters<T>) => void) => {
+  let timeout: NodeJS.Timeout;
+
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeout);
+    timeout = setTimeout(() => func(...args), wait);
+  };
 };

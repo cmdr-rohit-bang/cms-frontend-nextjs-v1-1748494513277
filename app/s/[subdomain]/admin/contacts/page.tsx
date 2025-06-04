@@ -16,9 +16,13 @@ import { ContactsImportModal } from "@/components/models/contacts-import-modal";
 import { toast } from "sonner";
 import { DeleteConfirmationDialog } from "@/components/models/delete-modal";
 import { TagsModal } from "@/components/models/tags-modal";
-import { BaseModal } from "@/components/models/base-modal";
 import CustomFields from "@/components/custom-forms/custom-fields-form";
-import { set } from "date-fns";
+import { CustomFieldModal } from "@/components/models/custom-fields-modal";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 export default function ContactsPage() {
   const router = useRouter();
@@ -40,11 +44,9 @@ export default function ContactsPage() {
     null
   );
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [isCustomFieldModalOpen, setIsCustomFieldModalOpen] = useState(false); 
+  const [isCustomFieldModalOpen, setIsCustomFieldModalOpen] = useState(false);
   const [customFieldsId, setCustomFieldsId] = useState<string[]>([]);
-  const [customFields, setCustomFields] = useState([
-    {  key: "", value: "" },
-  ]); 
+  const [customFields, setCustomFields] = useState([{ key: "", value: "" }]);
 
   const fetchContacts = async (
     page: number = currentPage,
@@ -148,18 +150,16 @@ export default function ContactsPage() {
     }
 
     if (deleteMode === "multiple" && idsToDelete) {
-      
       try {
-       const res:any = await deleteBulkData(`/api/contacts/bulk-action`, {
+        const res: any = await deleteBulkData(`/api/contacts/bulk-action`, {
           contact_ids: idsToDelete,
           action: "delete",
         });
         setData((prev) => prev.filter((c) => !idsToDelete.includes(c.id)));
-        if(res.success === true){
+        if (res.success === true) {
           toast.success(res.message);
           fetchContacts(currentPage, pageSize, searchQuery);
-        }
-        else{
+        } else {
           toast.error(res.message);
         }
       } catch (error) {
@@ -183,29 +183,25 @@ export default function ContactsPage() {
 
   const handleTagsConfirm = async (ids: string[], tags: string[]) => {
     setIsTagsModalOpen(false);
-    let res:any 
+    let res: any;
     tagsModalMode === "add"
-      ? res = await addTagsAndRemoveTags(`/api/contacts/bulk-action`, {
+      ? (res = await addTagsAndRemoveTags(`/api/contacts/bulk-action`, {
           contact_ids: ids,
           action: "add_tags",
           tags: tags,
-        })
-        
-      : res=await addTagsAndRemoveTags(`/api/contacts/bulk-action`, {
+        }))
+      : (res = await addTagsAndRemoveTags(`/api/contacts/bulk-action`, {
           contact_ids: ids,
           action: "remove_tags",
           tags: tags,
-        });
+        }));
 
-        if(res.success === true){
-          toast.success(res.message);
-          fetchContacts(currentPage, pageSize, searchQuery);
-        }
-        else{
-          toast.error("Tags could not be added");
-        }
-   
-   
+    if (res.success === true) {
+      toast.success(res.message);
+      fetchContacts(currentPage, pageSize, searchQuery);
+    } else {
+      toast.error("Tags could not be added");
+    }
   };
 
   const handleRemoveTags = (ids: string[]) => {
@@ -218,7 +214,7 @@ export default function ContactsPage() {
 
   const handleAddCustomField = (ids: string[]) => {
     console.log("add-custom-field", ids);
-      setCustomFieldsId(ids);
+    setCustomFieldsId(ids);
     setIsCustomFieldModalOpen(true);
     fetchContacts(currentPage, pageSize, searchQuery);
   };
@@ -236,22 +232,23 @@ export default function ContactsPage() {
 
       const jsonString = JSON.stringify(objectifiedCustomFields);
       const jsonParse = JSON.parse(jsonString);
-      
+
       const dataToSend = {
         contact_ids: customFieldsId,
         action: "update_fields",
         fields: jsonParse,
       };
-  
-      const res:any = await addTagsAndRemoveTags(`/api/contacts/bulk-action`, dataToSend);
-      if(res.success === true){
+
+      const res: any = await addTagsAndRemoveTags(
+        `/api/contacts/bulk-action`,
+        dataToSend
+      );
+      if (res.success === true) {
         toast.success("Custom fields updated successfully");
         fetchContacts(currentPage, pageSize, searchQuery);
-      }
-      else{
+      } else {
         toast.error(res.message);
       }
-      
     }
   };
 
@@ -281,6 +278,54 @@ export default function ContactsPage() {
       id: "address",
       accessorKey: "address",
       header: "Address",
+      cell({ row }) {
+        return row.getValue("address") || "-";
+      },
+    },
+    {
+      id: "tags",
+      accessorKey: "tags",
+      header: "Tags",
+      cell: ({ row }: { row: any }) => {
+        const tags = row.original.tags || [];
+
+        return (
+          <div className="flex items-center">
+            {tags.length > 0 ? (
+              <Popover>
+                <PopoverTrigger asChild>
+                  <button
+                    onClick={(e) => e.stopPropagation()}
+                    className="text-xs bg-blue-100 text-blue-800 rounded-full px-3 py-1 hover:bg-blue-200 transition-colors border border-blue-200"
+                  >
+                    {tags.length} {tags.length === 1 ? "tag" : "tags"}
+                  </button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-[200px] p-3 max-w-md"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="grid grid-cols-2 gap-2">
+                    {tags.map((tag: string, index: number) => (
+                      <div
+                        key={index}
+                        className="text-sm px-2 py-1 bg-gray-50 rounded text-gray-700 text-center hover:bg-gray-100 transition-colors"
+                        style={{
+                          gridRow: `span ${Math.ceil(tag.length / 10)}`,
+                        }}
+                      >
+                        {tag}
+                      </div>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            ) : (
+              <span className="text-xs text-gray-400 italic">No tags</span>
+            )}
+          </div>
+        );
+      },
     },
   ];
 
@@ -316,27 +361,25 @@ export default function ContactsPage() {
               label: "Delete Users",
               variant: "destructive",
               showCount: true,
-              action: openDeleteMultipleConfirmation
+              action: openDeleteMultipleConfirmation,
             },
             {
               id: "add-tags",
               label: "Add Tags",
-              action: handleAddTags
+              action: handleAddTags,
             },
             {
               id: "remove-tags",
               label: "Remove Tags",
-              action: handleRemoveTags
+              action: handleRemoveTags,
             },
             {
               id: "add-custom-field",
               label: "Add Custom Field",
-              action: handleAddCustomField
+              action: handleAddCustomField,
             },
-            
-          ]
-        }}  
-
+          ],
+        }}
       />
       <ContactsImportModal
         isOpen={isImportModalOpen}
@@ -383,10 +426,17 @@ export default function ContactsPage() {
         cancelLabel="Cancel"
         isLoading={false}
       />
-      <BaseModal onConfirm={handleAddCustomFieldConfirm} title="Add Custom Field" isOpen={isCustomFieldModalOpen} onClose={() => setIsCustomFieldModalOpen(false)}>
-      <CustomFields setCustomFields={setCustomFields} customFields={customFields} />
-        
-      </BaseModal>
+      <CustomFieldModal
+        onConfirm={handleAddCustomFieldConfirm}
+        title="Add Custom Field"
+        isOpen={isCustomFieldModalOpen}
+        onClose={() => setIsCustomFieldModalOpen(false)}
+      >
+        <CustomFields
+          setCustomFields={setCustomFields}
+          customFields={customFields}
+        />
+      </CustomFieldModal>
     </div>
   );
 }

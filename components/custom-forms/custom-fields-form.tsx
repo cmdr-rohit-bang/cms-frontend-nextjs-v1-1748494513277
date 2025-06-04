@@ -3,14 +3,20 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { X, Plus } from "lucide-react";
 
-export default function CustomFields( {setCustomFields, customFields}: { setCustomFields: React.Dispatch<React.SetStateAction<any[]>>, customFields: any[] }) {
-
-
-  const handleChange = (index: number, field: "key" | "value", value: string) => {
+export default function CustomFields({
+  setCustomFields,
+  customFields,
+}: {
+  setCustomFields: React.Dispatch<React.SetStateAction<any[]>>;
+  customFields: any[];
+}) {
+  const handleChange = (
+    index: number,
+    field: "key" | "value",
+    value: string
+  ) => {
     setCustomFields((prev) =>
-      prev.map((item, i) =>
-        i === index ? { ...item, [field]: value } : item
-      )
+      prev.map((item, i) => (i === index ? { ...item, [field]: value } : item))
     );
   };
 

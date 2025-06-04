@@ -556,6 +556,7 @@ interface Column {
   accessorKey?: string;
   visible?: boolean;
   render?: (value: any, row: any) => React.ReactNode;
+  cell?: (info: any) => React.ReactNode;
 }
 
 // Simple Selection Action Interface
@@ -645,7 +646,7 @@ export function DataTable<
 }: DataTableProps<TData, TValue>) {
   const [draggedItemId, setDraggedItemId] = useState<string | null>(null);
   const [targetRowIndex, setTargetRowIndex] = useState<number | null>(null);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+ 
   const [selectedRow, setSelectedRow] = useState<string | null>(null);
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
 
@@ -696,18 +697,28 @@ export function DataTable<
     }
 
     // Add data columns
-    columns.forEach((column) => {
+     columns.forEach((column) => {
       tableColumns.push({
         id: column.id,
         accessorKey: column.accessorKey,
         header: column.header,
         cell: (info: any) => {
-          const value = info.getValue();
-          const row = info.row.original;
-          return column.render ? column.render(value, row) : value;
+          // If column has a custom cell function, use it
+          if (column.cell) {
+            return column.cell(info);
+          }
+          // If column has a custom render function, use it (legacy support)
+          if (column.render) {
+            const value = info.getValue();
+            const row = info.row.original;
+            return column.render(value, row);
+          }
+          // Default: just return the value
+          return info.getValue();
         },
       });
     });
+
 
     // Add actions column
     if (onEdit || onDelete || onView) {
@@ -718,16 +729,17 @@ export function DataTable<
           <div className="flex gap-2">
             {onView && (
               <Button
-                variant="ghost"
+                variant="outline"
+                className="text-blue-500"
                 size="sm"
-                onClick={() => handleView(row.original)}
+                onClick={() => onView(row.original)}
               >
                 <Eye className="h-4 w-4" />
               </Button>
             )}
             {onEdit && (
               <Button
-                className="text-blue-500"
+                className="text-green-500"
                 variant="outline"
                 size="sm"
                 onClick={() => onEdit(row.original)}
@@ -801,11 +813,7 @@ export function DataTable<
     setTargetRowIndex(null);
   };
 
-  // View handler
-  const handleView = (row: TData) => {
-    setSelectedRow(row.id);
-    setIsViewModalOpen(true);
-  };
+
 
   // Selection handlers
   const handleSelectRow = (rowId: string, isSelected: boolean) => {

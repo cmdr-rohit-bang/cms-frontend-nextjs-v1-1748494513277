@@ -20,7 +20,7 @@ import { CommandList } from "../ui/command";
 import { CommandEmpty } from "../ui/command";
 import { CommandGroup } from "../ui/command";
 import { CommandItem } from "../ui/command";
-import { Check, ChevronsUpDown } from "lucide-react";
+import { CalendarIcon, Check, ChevronsUpDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SelectItem } from "../ui/select";
 import { SelectTrigger } from "../ui/select";
@@ -31,6 +31,8 @@ import Link from "next/link";
 import { fetchData } from "@/app/actions";
 import { Pagination } from "@/types/types";
 import { Contact as ContactType } from "@/types/types";
+import { Calendar } from "../ui/calendar";
+import { format } from "date-fns";
 
 const taskSchema = z.object({
   subject: z.string().min(1, "Subject is required"),
@@ -39,6 +41,7 @@ const taskSchema = z.object({
   category: z.string().optional(),
   status: z.string().optional(),
   assigned_to: z.string().optional(),
+  due_date: z.date().optional(),
 });
 
 
@@ -169,6 +172,46 @@ const TicketForm = ({
             )}
           />
         </div>
+
+                <FormField
+                  control={form.control}
+                  name="due_date"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-col">
+                      <FormLabel>Due Date</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-[240px] pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field?.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date < new Date("1900-01-01")}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
         <FormField
           control={form.control}
