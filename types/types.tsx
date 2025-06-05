@@ -1,4 +1,5 @@
 import { JSX } from "react";
+import { z } from "zod";
 
 export type Column = {
   id: string;
@@ -77,14 +78,54 @@ export interface TicketType {
   assigned_to: string;
   category: string;
   userId: string;
-  assignedToUser?: User;
+  assigned_admin?: User;
   due_date?: Date;
   contact?: Contact;
+  contact_name:string
+  contact_phone:string
   status:string;
   createdAt: Date;
   updatedAt: Date;
   tags: string[];
 }
+
+export interface TicketCategoryType {
+  id: string;
+  name: string;
+  details: string;
+}
+
+export interface TicketType {
+ 
+  title: string;
+  details: string;
+  status: string;
+  priority: string;
+  assignedToId: string;
+  product: string;
+  ticketCategoryId: string;
+  userId: string;
+  assignedToUser?: User;
+  dueDate?: Date;
+  contact?: Contact;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export const ticketFormSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  details: z.string().min(5, "Description must be at least 5 characters"),
+  ticketCategory: z.string().min(1, "Category is required"),
+  name: z.string().min(1, "Name is required"),
+  mobileNumber: z.string().min(10, "Mobile number must be at least 10 digits"),
+  countryCode: z.string(),
+  attachments: z
+    .array(z.object({ file: z.instanceof(File) }))
+    .max(5, "Maximum 5 files allowed")
+    .optional(),
+});
+
+export type TicketFormValues = z.infer<typeof ticketFormSchema>;
 
 export interface Comment {
   id: string;

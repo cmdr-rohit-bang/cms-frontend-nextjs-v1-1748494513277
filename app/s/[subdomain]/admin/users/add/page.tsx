@@ -24,12 +24,9 @@ export default function UsersPage() {
         return acc;
       }, {} as Record<string, any>);
 
-      const result = (await addData(
-        "/auth/tenant/register",
-        cleanedData
-      )) as any;
+      const result = (await addData( "/auth/tenant/register",cleanedData )) as any;
 
-      if (result?.status === "success") {
+      if (result?.success === true) {
         toast.success(result.message, { position: "top-right" });
         router.push("/admin/users");
       } else {
@@ -48,7 +45,7 @@ export default function UsersPage() {
   const defaultValue = {
     first_name: "",
     last_name: "",
-    phone: "",
+    phone_number: "",
     email: "",
     password: "",
     confirm_password: "",

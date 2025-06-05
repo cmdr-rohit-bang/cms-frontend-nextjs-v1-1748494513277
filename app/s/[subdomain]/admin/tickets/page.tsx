@@ -395,19 +395,30 @@ export default function TicketsPage() {
                   className="w-[200px] p-3 max-w-md"
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="grid grid-cols-2 gap-2">
-                    {tags.map((tag: string, index: number) => (
-                      <div
+                <div className="flex flex-wrap gap-1">
+                  {tags.map((tag: string, index: number) => {
+                    // Define color variants for badges
+                    const colorVariants = [
+                      'bg-blue-100 text-blue-800 border-blue-200',
+                      'bg-green-100 text-green-800 border-green-200',
+                      'bg-purple-100 text-purple-800 border-purple-200',
+                      'bg-yellow-100 text-yellow-800 border-yellow-200',
+                      'bg-pink-100 text-pink-800 border-pink-200'
+                    ];
+
+                    // Get color variant based on index
+                    const colorClass = colorVariants[index % colorVariants.length];
+
+                    return (
+                      <span
                         key={index}
-                        className="text-sm px-2 py-1 bg-gray-50 rounded text-gray-700 text-center hover:bg-gray-100 transition-colors"
-                        style={{
-                          gridRow: `span ${Math.ceil(tag.length / 10)}`,
-                        }}
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${colorClass}`}
                       >
                         {tag}
-                      </div>
-                    ))}
-                  </div>
+                      </span>
+                    );
+                  })}
+                </div>
                 </PopoverContent>
               </Popover>
             ) : (

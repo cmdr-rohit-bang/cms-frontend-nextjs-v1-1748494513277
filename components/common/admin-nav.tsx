@@ -10,6 +10,7 @@ import {
 import { CircleUser, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { signOut } from "next-auth/react";
+import { handleLogout } from "@/lib/utils";
 
 export default function AdminNav({
   expanded,
@@ -57,12 +58,7 @@ export default function AdminNav({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="cursor-pointer"
-                onClick={() => {
-                  signOut({
-                    callbackUrl: getCallbackUrl(),
-                    redirect: true,
-                  });
-                }}
+                 onClick={handleLogout }
               >
                 Sign Out
               </DropdownMenuItem>

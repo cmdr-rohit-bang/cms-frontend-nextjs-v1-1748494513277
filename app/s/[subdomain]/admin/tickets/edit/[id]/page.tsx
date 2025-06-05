@@ -2,11 +2,9 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
-
 import { useParams, useRouter } from "next/navigation";
 import TicketForm from "@/components/custom-forms/ticket-form";
 import { editData, fetchData } from "@/app/actions";
-import { TicketType } from "@/types/types";
 
 export default function UsersPage() {
   const params = useParams();
@@ -42,6 +40,7 @@ export default function UsersPage() {
     category: data?.category ?? "",
     assigned_to: data?.assigned_to ?? "",
     status:data?.status,
+    contact_id:data.contact_id,
     due_date: data?.due_date ? new Date(data.due_date) : new Date()
   };
 

@@ -47,7 +47,7 @@ const userFormSchema = z
         message: "Contain at least one special character.",
       })
       .trim(),
-    phone: z.string().trim().optional(),
+    phone_number: z.string().trim().optional(),
     job_title: z.string().trim().optional(),
     role: z.string(),
   })
@@ -126,10 +126,10 @@ const UserForm = ({
           />
           <FormField
             control={form.control}
-            name="phone"
+            name="phone_number"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Phone</FormLabel>
+                <FormLabel>Phone Number</FormLabel>
                 <FormControl>
                   <Input placeholder="1234567890" {...field} />
                 </FormControl>

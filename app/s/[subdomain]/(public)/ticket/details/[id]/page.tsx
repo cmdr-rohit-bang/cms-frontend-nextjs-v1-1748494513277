@@ -85,21 +85,21 @@ export default function TicketDetailPage() {
                   <div className="text-sm font-medium text-muted-foreground">
                     Status
                   </div>
-                  <span className="capitalize">{ticket.status} </span>
+                  {ticket.status}
                 </div>
 
                 <div className="space-y-1">
                   <div className="text-sm font-medium text-muted-foreground">
                     Priority
                   </div>
-                <span className="capitalize">  {ticket.priority}</span>
+                  {ticket.priority}
                 </div>
 
                 <div className="space-y-1">
                   <div className="text-sm font-medium text-muted-foreground">
                     Assigned To
                   </div>
-                  {ticket.assigned_admin?.first_name }&nbsp; {ticket.assigned_admin?.last_name }
+                  {ticket.assigned_admin?.first_name }&nbsp;{ticket.assigned_admin?.last_name }
                 </div>
 
                 <Separator />
@@ -113,7 +113,7 @@ export default function TicketDetailPage() {
                     <span>{ticket?.contact_name}</span>
                   </div>
                   <div className="text-sm text-muted-foreground">
-                     {ticket?.contact?.email}
+                    {ticket?.contact?.email}
                   </div>
                 </div>
                 <div className="space-y-1">

@@ -6,8 +6,9 @@ import { Column, Pagination, User as UserType } from "@/types/types";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { fetchData } from "@/app/actions";
-import { UserCheck } from "lucide-react";
+import { UserCheck, UserRoundCheck } from "lucide-react";
 import Image from "next/image";
+import { DeleteConfirmationDialog } from "@/components/models/delete-modal";
 
 export default function UsersPage() {
   const router = useRouter();
@@ -17,6 +18,8 @@ export default function UsersPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [emailVerificationToken, setEmailVerificationToken] = useState("");
 
   const fetchUser = async (
     page: number = currentPage,
@@ -67,6 +70,23 @@ export default function UsersPage() {
     fetchUser(1, newPageSize, searchQuery);
   };
 
+  const closeDeleteDialog = () => {
+    setIsDeleteDialogOpen(false);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      await fetchData(`/auth/tenant/verify-token?token${emailVerificationToken}`);
+      toast.success("user verify successfully");
+      await fetchUser(currentPage, pageSize, searchQuery);
+    } catch (error) {
+      console.error("Error in user verify:", error);
+      toast.error("Failed to user verify");
+    } finally {
+      closeDeleteDialog();
+    }
+  };
+
   const columns: Column[] = [
     {
       id: "Name",
@@ -89,22 +109,31 @@ export default function UsersPage() {
       header: "Email",
     },
     {
+      id: "phone_number",
+      accessorKey: "phone_number",
+      header: "Phone Number",
+    },
+    {
       id: "status",
       accessorKey: "status",
       header: "Status",
       cell: ({ row }: { row: any }) => {
         const status = row.original.status;
-
+        const emailToken = row.original.email_verification_token
         return status === "pending" ? (
-          <img
-            src="/icons/user-warning.svg"
+          <Image
+            src={`http://${process.env.NEXT_PUBLIC_DOMIAN_URL}/icons/user-warning.svg`}
             alt="FlexiCMS Dashboard"
-            width={80}
-            height={80}
-            className="object-cover"
+            width={24}
+            height={24}
+            className="object-cover cursor-pointer grayscale"
+            onClick={()=>{
+              setIsDeleteDialogOpen(true)
+              setEmailVerificationToken(emailToken)
+            }}
           />
         ) : (
-          <UserCheck className="text-green-500" />
+          <UserRoundCheck className="text-green-500" />
         );
       },
     },
@@ -118,7 +147,7 @@ export default function UsersPage() {
         data={data}
         loading={loading}
         onAdd={handleAdd}
-        onEdit={handleEdit}
+        
         pageNumber={currentPage}
         totalPages={totalPages}
         pageSize={pageSize}
@@ -129,6 +158,18 @@ export default function UsersPage() {
           has_previous: currentPage > 1,
         }}
         basePath="/admin/users"
+      />
+
+      <DeleteConfirmationDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={closeDeleteDialog}
+        onConfirm={confirmDelete}
+        isDestruct={false}
+        title={"Verify User"}
+        description={
+          "Are you sure you want to verify this user? This action cannot be undone."
+        }
+        confirmLabel="Verify"
       />
     </div>
   );

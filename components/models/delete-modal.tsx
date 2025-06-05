@@ -10,6 +10,7 @@ interface DeleteConfirmationDialogProps {
   confirmLabel?: string;
   cancelLabel?: string;
   isLoading?: boolean;
+  isDestruct?:boolean
 }
 
 export const DeleteConfirmationDialog = ({
@@ -21,6 +22,7 @@ export const DeleteConfirmationDialog = ({
   confirmLabel = "Delete",
   cancelLabel = "Cancel",
   isLoading = false,
+  isDestruct=true
 }: DeleteConfirmationDialogProps) => {
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
@@ -36,7 +38,7 @@ export const DeleteConfirmationDialog = ({
               e.preventDefault();
               onConfirm();
             }}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:bg-gray-400"
+            className={`${isDestruct ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"   :  "bg-green-500 hover:bg-green-900"   }   disabled:bg-gray-400`}
           >
             {isLoading ? confirmLabel+'...' :confirmLabel }
           </AlertDialogAction>

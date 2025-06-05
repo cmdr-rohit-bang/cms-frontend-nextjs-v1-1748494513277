@@ -36,14 +36,14 @@ import { format } from "date-fns";
 
 const taskSchema = z.object({
   subject: z.string().min(1, "Subject is required"),
-  description: z.string().min(1, "Description is required"),
+  description: z.string().min(10, "Description is required"),
   priority: z.string().optional(),
   category: z.string().optional(),
   status: z.string().optional(),
   assigned_to: z.string().optional(),
   due_date: z.date().optional(),
+  contact_id: z.string().optional(),
 });
-
 
 type TicketValues = z.infer<typeof taskSchema>;
 
@@ -54,7 +54,11 @@ const TicketForm = ({
   isLoading,
 }: {
   onSubmit: (data: TicketValues) => void;
-  defaultValue: TicketValues;
+  defaultValue: TicketValues & {
+    status: string;
+    category: string;
+    priority: string;
+  };
   buttonText: string;
   isLoading: boolean;
 }) => {
@@ -63,28 +67,56 @@ const TicketForm = ({
     defaultValues: defaultValue,
   });
 
-  const [contacts, setContacts] = useState<{ label: string; value: string }[]>([]);
+  const [contacts, setContacts] = useState<{ label: string; value: string }[]>(
+    []
+  );
+
+  const [users, setUsers] = useState<{ label: string; value: string }[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    form.reset(defaultValue);
-  }, [defaultValue, form]);
-
-  useEffect(() => {
     const fetchContactData = async () => {
-      const res = await fetchData(`/api/contacts?search=${searchQuery}`) as {
+      const res = (await fetchData(`/api/contacts?search=${searchQuery}`)) as {
         data: ContactType[];
         pagination: Pagination;
-      };;
+      };
       const resData = res?.data;
       const formattedContacts = resData.map((contact: any) => ({
         label: contact.name,
         value: contact.id,
-      }));  
+      }));
       setContacts(formattedContacts);
     };
     fetchContactData();
   }, [searchQuery]);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const res = (await fetchData(`/auth/tenant/all`)) as {
+        data: ContactType[];
+      };
+      const resData = res?.data;
+      const formattedContacts = resData.map((contact: any) => ({
+        label: contact.first_name + " " + contact.last_name,
+        value: contact.id,
+      }));
+      setUsers(formattedContacts);
+    };
+    fetchUserData();
+  }, []);
+
+  useEffect(() => {
+    console.log("defaultValue", defaultValue);
+    // Reset the form with all values including status, category, and priority
+    if (defaultValue) {
+      form.reset({
+        ...defaultValue,
+        status: defaultValue.status || undefined,
+        category: defaultValue.category || undefined,
+        priority: defaultValue.priority || undefined,
+      });
+    }
+  }, [defaultValue, form, isLoading]);
 
   return (
     <FormProvider {...form}>
@@ -109,13 +141,12 @@ const TicketForm = ({
             )}
           />
 
-          {/* Assigned To */}
           <FormField
             control={form.control}
-            name="assigned_to"
+            name="contact_id"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Assigned To</FormLabel>
+                <FormLabel>Contact</FormLabel>
                 <Popover>
                   <PopoverTrigger asChild>
                     <FormControl>
@@ -148,7 +179,7 @@ const TicketForm = ({
                               key={contact.value}
                               value={contact.label}
                               onSelect={() =>
-                                form.setValue("assigned_to", contact.value)
+                                form.setValue("contact_id", contact.value)
                               }
                             >
                               {contact.label}
@@ -171,47 +202,104 @@ const TicketForm = ({
               </FormItem>
             )}
           />
-        </div>
+          <FormField
+            control={form.control}
+            name="due_date"
+            render={({ field }) => (
+              <FormItem className="flex gap-1 flex-col mt-[6px]">
+                <FormLabel>Due Date</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn(
+                          "pl-3 text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value ? (
+                          format(field.value, "PPP")
+                        ) : (
+                          <span>Pick a date</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field?.value}
+                      onSelect={field.onChange}
+                      disabled={(date) => date < new Date("1900-01-01")}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-                <FormField
-                  control={form.control}
-                  name="due_date"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Due Date</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-[240px] pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground"
-                              )}
+          <FormField
+            control={form.control}
+            name="assigned_to"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Assigned To</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        className={cn(
+                          "w-full justify-between",
+                          !field.value && "text-muted-foreground"
+                        )}
+                      >
+                        {field.value
+                          ? users.find((c) => c.value === field.value)?.label
+                          : "Select a person"}
+                        <ChevronsUpDown className="ml-2 h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="p-0">
+                    <Command>
+                      <CommandList>
+                        <CommandEmpty>No match found.</CommandEmpty>
+                        <CommandGroup>
+                          {users.map((user) => (
+                            <CommandItem
+                              key={user.value}
+                              value={user.label}
+                              onSelect={() =>
+                                form.setValue("assigned_to", user.value)
+                              }
                             >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field?.value}
-                            onSelect={field.onChange}
-                            disabled={(date) => date < new Date("1900-01-01")}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                              {user.label}
+                              <Check
+                                className={cn(
+                                  "ml-auto",
+                                  user.value === field.value
+                                    ? "opacity-100"
+                                    : "opacity-0"
+                                )}
+                              />
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <FormField
           control={form.control}
@@ -240,10 +328,7 @@ const TicketForm = ({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Status</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select status" />
@@ -267,10 +352,7 @@ const TicketForm = ({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Priority</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select priority" />
@@ -295,10 +377,7 @@ const TicketForm = ({
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Category</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
+                <Select onValueChange={field.onChange} value={field.value}>
                   <FormControl>
                     <SelectTrigger>
                       <SelectValue placeholder="Select category" />

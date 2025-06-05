@@ -30,11 +30,11 @@ export const WhatsappMessageSendModel = ({
   const handleSendMessage = async () => {
     if (newMessage.trim()) {
       const messageData = {
-          message: newMessage,
-        contact_id: id,
-        // Add other necessary fields here
+          content: newMessage,
+          phone_number:phoneNumber,
+           type: "text"
       };
-      const result = await addData("/admin/whatsapp-message", messageData) as any;
+      const result = await addData("/api/whatsapp/messages/send", messageData) as any;
       if (result?.status === "success") {
         toast.success(result.message, { position: "top-right" });
         setNewMessage("");

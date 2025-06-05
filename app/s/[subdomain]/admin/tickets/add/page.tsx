@@ -30,6 +30,8 @@ export default function UsersPage() {
     priority: "",
     category: "",
     assigned_to: "", 
+    status:"",
+    due_date: new Date()
   };
 
   return (
