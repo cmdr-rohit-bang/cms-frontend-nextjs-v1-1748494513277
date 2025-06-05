@@ -739,7 +739,7 @@ export function DataTable<
             )}
             {onEdit && (
               <Button
-                className="text-green-500"
+                className="text-blue-700"
                 variant="outline"
                 size="sm"
                 onClick={() => onEdit(row.original)}

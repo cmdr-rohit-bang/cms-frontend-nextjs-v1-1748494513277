@@ -246,7 +246,7 @@ export default function TicketsPage() {
     }
   };
 
-  // Change handlers - unified approach
+
   const openChangeModal = (type: ModalType, ids: string[]) => {
     setChangeModalState({ type, open: true });
     setSelectedIds(ids);

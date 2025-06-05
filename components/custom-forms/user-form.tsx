@@ -12,7 +12,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
 import {
   Select,
@@ -22,59 +21,34 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Switch } from "@/components/ui/switch";
 import Link from "next/link";
 import { PasswordInput } from "@/components/common/password-input";
 
-const permissions = [
-  {
-    id: "contacts",
-    label: "Contacts Management",
-  },
-  {
-    id: "tickets",
-    label: "Tickets Management",
-  },
-  {
-    id: "comments",
-    label: "Comments Management",
-  },
-  {
-    id: "tags",
-    label: "Tags Management",
-  },
-  {
-    id: "user",
-    label: "User Management",
-  },
-] as const;
-
 const userFormSchema = z
   .object({
-    name: z.string().min(2, { message: "Required" }).trim(),
+    first_name: z.string().min(2, { message: "Required" }).trim(),
+    last_name: z.string().min(2, { message: "Required" }).trim(),
     email: z.string().email({ message: "Required" }).trim(),
     password: z
-    .string()
-    .min(8, { message: 'Be at least 8 characters long' })
-    .regex(/[a-zA-Z]/, { message: 'Contain at least one letter.' })
-    .regex(/[0-9]/, { message: 'Contain at least one number.' })
-    .regex(/[^a-zA-Z0-9]/, {
-      message: 'Contain at least one special character.',
-    })
-    .trim(),
-    confirm_password: z
       .string()
-      .min(8, { message: 'Be at least 8 characters long' })
-      .regex(/[a-zA-Z]/, { message: 'Contain at least one letter.' })
-      .regex(/[0-9]/, { message: 'Contain at least one number.' })
+      .min(8, { message: "Be at least 8 characters long" })
+      .regex(/[a-zA-Z]/, { message: "Contain at least one letter." })
+      .regex(/[0-9]/, { message: "Contain at least one number." })
       .regex(/[^a-zA-Z0-9]/, {
-        message: 'Contain at least one special character.',
+        message: "Contain at least one special character.",
       })
       .trim(),
-    permissions: z.array(z.string()).optional(),
-    phone: z.string().min(10, { message: "Required" }).trim(),
-    status: z.boolean().default(false),
+    confirm_password: z
+      .string()
+      .min(8, { message: "Be at least 8 characters long" })
+      .regex(/[a-zA-Z]/, { message: "Contain at least one letter." })
+      .regex(/[0-9]/, { message: "Contain at least one number." })
+      .regex(/[^a-zA-Z0-9]/, {
+        message: "Contain at least one special character.",
+      })
+      .trim(),
+    phone: z.string().trim().optional(),
+    job_title: z.string().trim().optional(),
     role: z.string(),
   })
   .refine((data) => data.password === data.confirm_password, {
@@ -108,17 +82,31 @@ const UserForm = ({
         <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="name"
+            name="first_name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Name</FormLabel>
+                <FormLabel>First Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="John Doe" {...field} />
+                  <Input placeholder="John" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+          <FormField
+            control={form.control}
+            name="last_name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Last Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Doe" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="email"
@@ -136,8 +124,6 @@ const UserForm = ({
               </FormItem>
             )}
           />
-        </div>
-        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="phone"
@@ -151,7 +137,8 @@ const UserForm = ({
               </FormItem>
             )}
           />
-
+        </div>
+        <div className="grid grid-cols-2 gap-4">
           <FormField
             control={form.control}
             name="role"
@@ -169,14 +156,29 @@ const UserForm = ({
                   </FormControl>
                   <SelectContent>
                     <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="user">User</SelectItem>
+                    <SelectItem value="manager">Manager</SelectItem>
+                    <SelectItem value="editor">Editor</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
               </FormItem>
             )}
           />
+          <FormField
+            control={form.control}
+            name="job_title"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Job Title</FormLabel>
+                <FormControl>
+                  <Input placeholder="Manager" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         </div>
+
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <FormField
@@ -209,79 +211,6 @@ const UserForm = ({
               )}
             />
           </div>
-        </div>
-        <FormField
-          control={form.control}
-          name="permissions"
-          render={() => (
-            <FormItem>
-              <div className="mb-4">
-                <FormLabel>Permissions</FormLabel>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                {permissions.map((permission) => (
-                  <FormField
-                    key={permission.id}
-                    control={form.control}
-                    name="permissions"
-                    render={({ field }) => {
-                      return (
-                        <FormItem
-                          key={permission.id}
-                          className="flex flex-row items-start space-x-3 space-y-0"
-                        >
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value?.includes(permission.id)}
-                              onCheckedChange={(checked) => {
-                                return checked
-                                  ? field.onChange([
-                                      ...(field.value ?? []),
-                                      permission.id,
-                                    ])
-                                  : field.onChange(
-                                      field.value?.filter(
-                                        (value) => value !== permission.id
-                                      )
-                                    );
-                              }}
-                            />
-                          </FormControl>
-                          <FormLabel className="font-normal">
-                            {permission.label}
-                          </FormLabel>
-                        </FormItem>
-                      );
-                    }}
-                  />
-                ))}
-              </div>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="status"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                <div className="space-y-0.5">
-                  <FormLabel className="text-base">User Status</FormLabel>
-                  <FormDescription>
-                    Enable or disable user access
-                  </FormDescription>
-                </div>
-                <FormControl>
-                  <Switch
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-              </FormItem>
-            )}
-          />
         </div>
 
         <div className="flex justify-end gap-2">
