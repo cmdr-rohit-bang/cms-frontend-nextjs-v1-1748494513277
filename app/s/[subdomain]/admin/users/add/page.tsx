@@ -24,9 +24,8 @@ export default function UsersPage() {
       }, {} as Record<string, any>);
 
       const result = (await addData( "/auth/tenant/register",cleanedData )) as any;
-
-      if (result?.success === true) {
-        toast.success(result.message, { position: "top-right" });
+      if (result?.data.success === true) {
+        toast.success(result.data.message, { position: "top-right" });
         router.push("/admin/users");
       } else {
         toast.error(result.message || "Something went wrong.", {

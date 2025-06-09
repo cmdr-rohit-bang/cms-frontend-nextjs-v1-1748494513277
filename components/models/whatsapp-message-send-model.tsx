@@ -169,6 +169,7 @@ import { Input } from "../ui/input";
 import { toast } from "sonner";
 import { addData } from "@/app/actions";
 import { Phone } from "lucide-react";
+import { WhatsappMessage } from "@/types/types";
 
 const formSchema = z.object({
   phoneNumber: z
@@ -188,11 +189,11 @@ type FormValues = z.infer<typeof formSchema>;
 export const WhatsappMessageSendModel = ({
   isOpen,
   onClose,
-  id,
+  
 }: {
   isOpen: boolean;
   onClose: Dispatch<SetStateAction<boolean>>;
-  id: string | null;
+  
 }) => {
   const [loading, setLoading] = useState(false);
   const form = useForm<FormValues>({
@@ -213,12 +214,11 @@ export const WhatsappMessageSendModel = ({
       type: "text",
     })) as any;
 
-    if (result?.status === "success") {
-      toast.success(result.message, { position: "top-right" });
-      form.reset();
-      onClose(false);
+    if (result?.data.success === true) {
+      toast.success(result.data.message, { position: "top-right" });
+      handleClose();
     } else {
-      toast.error(result.message, { position: "top-right" });
+      toast.error(result.data.message, { position: "top-right" });
     }
     setLoading(false);
   };
@@ -231,8 +231,8 @@ export const WhatsappMessageSendModel = ({
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[600px] rounded-xl p-0 overflow-hidden">
-        <DialogHeader className="bg-blue-600 px-6 py-4">
-          <DialogTitle className="text-white text-xl font-semibold">
+        <DialogHeader className="bg-gray-100 px-6 py-4">
+          <DialogTitle className="text-gray-800 text-xl font-semibold">
             📩 Send WhatsApp Message
           </DialogTitle>
         </DialogHeader>

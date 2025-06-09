@@ -18,6 +18,7 @@ import {
 import { PasswordInput } from "@/components/common/password-input";
 import SubDomainCheck from "@/components/common/sub-domain-check";
 import axios from "axios";
+import { toast } from "sonner";
 
 const SignupSchema = z
   .object({
@@ -71,21 +72,14 @@ export default function TenantCreateForm({
           admin_password: data.admin_password,
           phone: data.phone,
           subdomain: subdomain,
-          selected_modules: [
-            "tickets",
-            "contacts",
-            "whatsapp_messages",
-            "broadcast_campaigns",
-          ],
+          selected_modules: ["tickets", "contacts","whatsapp","broadcasts"],
           template: "modern",
         }
       );
-
-      console.log(res.data);
       setIsSubmitted(true);
       setIsLoading(false);
-    } catch (error) {
-      console.error("Error creating tenant:", error);
+    } catch (error:any) {
+      toast.error(error.message || "Error creating tenant:");
     } finally {
       setIsLoading(false);
     }

@@ -145,7 +145,6 @@ export default function UsersPage() {
         data={data}
         loading={loading}
         onAdd={handleAdd}
-        
         pageNumber={currentPage}
         totalPages={totalPages}
         pageSize={pageSize}

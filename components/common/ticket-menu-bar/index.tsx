@@ -17,14 +17,12 @@ import { useSession } from "next-auth/react";
 
 const TicketMenuBar = () => {
   const [isOtpModalOpen, setIsOtpModalOpen] = useState(false);
-  const pathName = usePathname()
- 
-  const session  = useSession();
-      const router = useRouter();
-   const handleLogout = () => {
-  
-   
-    router.push('/ticket/new');
+  const pathName = usePathname();
+
+  const session = useSession();
+  const router = useRouter();
+  const handleLogout = () => {
+    router.push("/ticket/new");
     window.location.reload();
   };
   return (
@@ -34,7 +32,16 @@ const TicketMenuBar = () => {
           <li>
             {session ? (
               <Button>
-                <Link href={pathName == "/ticket/new" ? "/ticket/my-tickets" : "/ticket/new"}> {pathName == "/ticket/new" ? "My Tickets" : "New Ticket"}</Link>
+                <Link
+                  href={
+                    pathName == "/ticket/new"
+                      ? "/ticket/my-tickets"
+                      : "/ticket/new"
+                  }
+                >
+                  {" "}
+                  {pathName == "/ticket/new" ? "My Tickets" : "New Ticket"}
+                </Link>
               </Button>
             ) : (
               <Button onClick={() => setIsOtpModalOpen(true)}>
@@ -57,7 +64,10 @@ const TicketMenuBar = () => {
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem   onClick={handleLogout} className="cursor-pointer text-destructive focus:text-destructive">
+              <DropdownMenuItem
+                onClick={handleLogout}
+                className="cursor-pointer text-destructive focus:text-destructive"
+              >
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Log out</span>
               </DropdownMenuItem>

@@ -12,10 +12,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useParams, useRouter } from "next/navigation";
-
 import { Button } from "../ui/button";
 import { PasswordInput } from "../common/password-input";
 import { toast } from "sonner";
@@ -23,10 +21,12 @@ import { toast } from "sonner";
 const adminFormSchema = z.object({
   email: z
     .string()
+    .trim()
     .min(1, { message: "Please enter your email" })
     .email({ message: "Invalid email address" }),
   password: z
     .string()
+    .trim()
     .min(1, {
       message: "Please enter your password",
     })
@@ -58,15 +58,12 @@ export function UserAuthForm() {
       subdomain: subdomain as string  ,
     });
 
-   
     if (signInData?.ok) {
-       console.log("SignIn Data:if", signInData);
       router.push("/admin/dashboard");
       toast.success("Login successfully.", {
         position: "top-right",
       });
     } else {
-       console.log("SignIn Data:else", signInData);
       setIsLoading(false);
       toast.error("Invalid credentials.", {
         position: "top-right",
@@ -99,15 +96,15 @@ export function UserAuthForm() {
                 <FormItem className="space-y-1">
                   <div className="flex items-center justify-between">
                     <FormLabel>Password</FormLabel>
-                    <Link
+                    {/* <Link
                       href="/forgot-password"
                       className="text-sm font-medium text-muted-foreground hover:opacity-75"
                     >
                       Forgot password?
-                    </Link>
+                    </Link> */}
                   </div>
                   <FormControl>
-                    <PasswordInput placeholder="********" {...field} />
+                    <PasswordInput  placeholder="********" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

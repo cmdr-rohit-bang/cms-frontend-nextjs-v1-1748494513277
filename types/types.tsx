@@ -142,7 +142,17 @@ export interface WhatsappMessage {
   id: string;
   order_number: number;
   phone_number: string;
-  message: string;
+  content: string;
+  messages: Messages[];
   status: 'sent' | 'delivered' | 'read' | 'failed' | 'pending' | 'scheduled';
   date: Date;
+}
+
+export interface Messages {
+  direction: string;
+  content: string;
+  created_at:Date
+  phone_number: string;
+  sent_by_admin_id: string;
+  status: 'sent' | 'delivered' | 'read' | 'failed' | 'pending' | 'scheduled';
 }
