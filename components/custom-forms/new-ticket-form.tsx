@@ -30,40 +30,45 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
-
-
-
-import { useEffect } from "react";
-import { TicketCategoryType, ticketFormSchema, TicketFormValues } from "@/types/types";
+import { TicketCategoryType } from "@/types/types";
 import { FileDropzone } from "../common/file-dropzone";
+import { z } from "zod";
+
+export const ticketSchema = z.object({
+  subject: z.string().min(1, "Subject is required"),
+  description: z.string().min(10, "Description is required"),
+  contact_name: z.string().min(1, "Name is required"),
+  contact_phone: z.string().min(1, "Phone number is required"),
+  category: z.string().optional(),
+  countryCode: z.string().optional(),
+});
+
+export type TicketValues = z.infer<typeof ticketSchema>;
 
 interface TicketFormProps {
-  onSubmit: (data: TicketFormValues) => void;
+  onSubmit: (data: TicketValues) => void;
   submitText?: string;
   isLoading?: boolean;
-  ticketCategoryData: TicketCategoryType[];
+ 
 }
 
 export function NewTicketForm({
   onSubmit,
   submitText = "Submit Ticket",
   isLoading = false,
-  ticketCategoryData,
+
 }: TicketFormProps) {
-  const form = useForm<TicketFormValues>({
-    resolver: zodResolver(ticketFormSchema),
+  const form = useForm<TicketValues>({
+    resolver: zodResolver(ticketSchema),
     defaultValues: {
-      ticketCategory: "",
-      title: "",
-      details: "",
-      name: "",
+      category: "",
+      subject: "",
+      description: "",
+      contact_name: "",
+      contact_phone: "",
       countryCode: "+1",
-      mobileNumber: "",
-      attachments: [],
     },
   });
-
-
 
   return (
     <Card className="w-full max-w-lg shadow-lg">
@@ -78,25 +83,24 @@ export function NewTicketForm({
           <CardContent className="space-y-4">
             <FormField
               control={form.control}
-              name="ticketCategory"
+              name="category"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>category</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
+                  <FormLabel>Category</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
+                        <SelectValue placeholder="Select category" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {ticketCategoryData.map((category) => (
-                        <SelectItem key={category?.id} value={category?.id}>
-                          {category?.name}
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="general">General</SelectItem>
+                      <SelectItem value="technical">Technical</SelectItem>
+                      <SelectItem value="sales">Sales</SelectItem>
+                      <SelectItem value="support">Support</SelectItem>
+                      <SelectItem value="billing">Billing</SelectItem>
+                      <SelectItem value="accounting">Accounting</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -106,13 +110,13 @@ export function NewTicketForm({
 
             <FormField
               control={form.control}
-              name="title"
+              name="subject"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
+                  <FormLabel>Subject</FormLabel>
                   <FormControl>
                     <Input
-                      placeholder="Brief description of the issue"
+                      placeholder="Briefly describe your issue"
                       {...field}
                     />
                   </FormControl>
@@ -123,7 +127,7 @@ export function NewTicketForm({
 
             <FormField
               control={form.control}
-              name="details"
+              name="description"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Description</FormLabel>
@@ -139,7 +143,7 @@ export function NewTicketForm({
               )}
             />
 
-            <FormField
+            {/* <FormField
               control={form.control}
               name="attachments"
               render={({ field }) => (
@@ -168,12 +172,12 @@ export function NewTicketForm({
                   <FormMessage />
                 </FormItem>
               )}
-            />
+            /> */}
 
             <div className="grid gap-4 md:grid-cols-2">
               <FormField
                 control={form.control}
-                name="name"
+                name="contact_name"
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Your Name</FormLabel>
@@ -188,7 +192,7 @@ export function NewTicketForm({
               <div className="space-y-2">
                 <FormField
                   control={form.control}
-                  name="mobileNumber"
+                  name="contact_phone"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Mobile Number</FormLabel>
@@ -236,7 +240,7 @@ export function NewTicketForm({
             <div className="text-center text-sm">
               Already have a ticket?{" "}
               <Link
-                href="/tickets/my-tickets"
+                href="/ticket/my-tickets"
                 className="font-medium text-primary hover:underline"
               >
                 Check status

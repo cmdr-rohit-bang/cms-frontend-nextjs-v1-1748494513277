@@ -6,14 +6,14 @@ import { Column, Pagination, User as UserType } from "@/types/types";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { fetchData } from "@/app/actions";
-import { UserCheck, UserRoundCheck } from "lucide-react";
+import {  UserRoundCheck } from "lucide-react";
 import Image from "next/image";
 import { DeleteConfirmationDialog } from "@/components/models/delete-modal";
 
 export default function UsersPage() {
   const router = useRouter();
   const [data, setData] = useState<UserType[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [totalPages, setTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
@@ -41,9 +41,8 @@ export default function UsersPage() {
 
       setData(response.data || []);
       setTotalPages(response.pagination?.total_pages || 1);
-    } catch (error) {
-      console.error("Error fetching tickets:", error);
-      toast.error("Failed to fetch tickets");
+    } catch (error:any) {
+      toast.error(error.message||"Failed to fetch tickets");
     } finally {
       setLoading(false);
     }
@@ -79,9 +78,8 @@ export default function UsersPage() {
       await fetchData(`/auth/tenant/verify-token?token${emailVerificationToken}`);
       toast.success("user verify successfully");
       await fetchUser(currentPage, pageSize, searchQuery);
-    } catch (error) {
-      console.error("Error in user verify:", error);
-      toast.error("Failed to user verify");
+    } catch (error:any) {
+      toast.error(error.message||"Failed to user verify");
     } finally {
       closeDeleteDialog();
     }

@@ -54,16 +54,22 @@ export async function middleware(request: NextRequest) {
     
     // Check if accessing admin routes on subdomain
     if (pathname.startsWith('/admin')) {
-      // Redirect to sign-in if not authenticated
       if (!token) {
         return NextResponse.redirect(new URL('/', request.url))
       }
       
-      // Check if user has admin or superadmin role
+      // Check if user has admin or super admin role
       if (token.role !== 'owner' && token.role !== 'super_admin') {
         // Redirect to unauthorized page
         return NextResponse.redirect(new URL('/', request.url))
       }
+    }
+
+    // Handle ticket routes redirection
+    if (pathname.startsWith('/ticket/details') ||
+        pathname.startsWith('/ticket/my-tickets') ||
+        pathname.startsWith('/ticket/success')) {
+      return NextResponse.redirect(new URL('/ticket/new', request.url))
     }
     
     // Rewrite to tenant page

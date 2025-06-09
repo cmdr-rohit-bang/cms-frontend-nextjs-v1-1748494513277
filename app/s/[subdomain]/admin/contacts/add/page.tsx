@@ -26,7 +26,6 @@ export default function UsersPage() {
     setIsPending(true);
     const result = await addData("/api/contacts", data) as any;
     if (result?.data?.success === true) {
-
       toast.success(result.data.message, { position: "top-right" });
       router.push("/admin/contacts");
     } else {

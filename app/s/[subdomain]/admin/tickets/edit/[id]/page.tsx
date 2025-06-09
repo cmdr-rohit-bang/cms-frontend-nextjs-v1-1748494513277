@@ -14,8 +14,7 @@ export default function UsersPage() {
 
   useEffect(() => {
     const fetchDataById = async () => {
-      const data = await fetchData(`/api/tickets/${params.id}`) as any;
-      console.log("data",data.data);    
+      const data = await fetchData(`/api/tickets/${params.id}`) as any;    
       setData(data.data); 
     };
     fetchDataById();

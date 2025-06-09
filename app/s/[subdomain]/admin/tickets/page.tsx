@@ -65,7 +65,7 @@ export default function TicketsPage() {
 
   // Data state
   const [data, setData] = useState<TicketType[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // Pagination state
   const [totalPages, setTotalPages] = useState(1);
@@ -117,18 +117,15 @@ export default function TicketsPage() {
         data: TicketType[];
         pagination: Pagination;
       };
-
       setData(response.data || []);
       setTotalPages(response.pagination?.total_pages || 1);
-    } catch (error) {
-      console.error("Error fetching tickets:", error);
-      toast.error("Failed to fetch tickets");
+    } catch (error:any) {
+      toast.error(error.message || "Failed to fetch tickets");
     } finally {
       setLoading(false);
     }
   };
 
-  // Fetch contacts for assign to dropdown
   const fetchContacts = async (
     search: string = "",
     forSearch: boolean = false
@@ -148,11 +145,10 @@ export default function TicketsPage() {
       } else {
         setTableContacts(formattedContacts);
       }
-    } catch (error) {
-      console.error("Error fetching contacts:", error);
-      toast.error("Failed to fetch contacts");
+    } catch (error:any) {
+      toast.error(error.message || "Failed to fetch contacts");
     } finally {
-      console.log("success");
+      setContactsLoading(false);
     }
   };
 
@@ -165,14 +161,13 @@ export default function TicketsPage() {
     fetchContacts(search, true);
   }, 300);
 
-  // Navigation handlers
+
   const handleAdd = () => router.push("/admin/tickets/add");
   const handleEdit = (ticket: any) =>
     router.push(`/admin/tickets/edit/${ticket.id}`);
   const handleView = (ticket: any) =>
     router.push(`/admin/tickets/details/${ticket.id}`);
 
-  // Delete handlers
   const openDeleteConfirmation = (ticket: any) => {
     setItemToDelete(ticket);
     setDeleteMode("single");
@@ -198,9 +193,8 @@ export default function TicketsPage() {
         toast.success(`${idsToDelete.length} tickets deleted successfully`);
       }
       await fetchTickets(currentPage, pageSize, searchQuery);
-    } catch (error) {
-      console.error("Error deleting tickets:", error);
-      toast.error("Failed to delete tickets");
+    } catch (error:any) {
+      toast.error(error.message || "Failed to delete tickets");
     } finally {
       closeDeleteDialog();
     }
@@ -213,7 +207,6 @@ export default function TicketsPage() {
     setDeleteMode(null);
   };
 
-  // Tags handlers
   const handleAddTags = (ids: string[]) => {
     setTagsModalMode("add");
     setIsTagsModalOpen(true);
@@ -238,9 +231,8 @@ export default function TicketsPage() {
         `Tags ${tagsModalMode === "add" ? "added" : "removed"} successfully`
       );
       await fetchTickets(currentPage, pageSize, searchQuery);
-    } catch (error) {
-      console.error("Error updating tags:", error);
-      toast.error("Failed to update tags");
+    } catch (error:any) {
+      toast.error(error.message || "Failed to update tags");
     } finally {
       setIsTagsModalOpen(false);
     }
@@ -298,7 +290,6 @@ export default function TicketsPage() {
       toast.success(`${type.replace("_", " ")} updated successfully`);
       await fetchTickets(currentPage, pageSize, searchQuery);
     } catch (error) {
-      console.error(`Error updating ${changeModalState.type}:`, error);
       toast.error(`Failed to update ${changeModalState.type}`);
     } finally {
       closeChangeModal();

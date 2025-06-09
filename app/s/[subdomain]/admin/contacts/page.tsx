@@ -71,8 +71,8 @@ export default function ContactsPage() {
 
       setData(response.data || (response.data as ContactType[])); // Handle both formats
       setTotalPages(response.pagination?.total_pages || 1);
-    } catch (error) {
-      console.error("Error fetching contacts:", error);
+    } catch (error:any) {
+      toast.error(error.message|| "Error fetching contacts:");
     } finally {
       setLoading(false);
     }
@@ -119,8 +119,8 @@ export default function ContactsPage() {
       const res = await importData("/api/contacts/import", formData);
       fetchContacts(currentPage, pageSize, searchQuery);
       toast.success("Contacts imported successfully");
-    } catch (error) {
-      console.error("Import failed:", error);
+    } catch (error:any) {
+      toast.error(error.message || "Import failed:", );
     }
   };
 
@@ -143,9 +143,8 @@ export default function ContactsPage() {
         setData((prev) => prev.filter((c) => c.id !== itemToDelete.id));
         toast.success("Contact deleted successfully");
         fetchContacts(currentPage, pageSize, searchQuery);
-      } catch (error) {
-        console.error("Error deleting contact:", error);
-        toast.error("Failed to delete contact");
+      } catch (error:any) {
+        toast.error(error.message||"Failed to delete contact");
       }
     }
 
@@ -162,9 +161,8 @@ export default function ContactsPage() {
         } else {
           toast.error(res.message);
         }
-      } catch (error) {
-        console.error("Error deleting contacts:", error);
-        toast.error("Failed to delete contacts");
+      } catch (error:any) {
+        toast.error(error.message||"Failed to delete contacts");
       }
     }
 

@@ -1,4 +1,149 @@
+// "use client";
+// import React, { Dispatch, SetStateAction, useState } from "react";
+// import {
+//   Dialog,
+//   DialogContent,
+//   DialogHeader,
+//   DialogTitle,
+// } from "@/components/ui/dialog";
+// import * as z from "zod";
+// import { zodResolver } from "@hookform/resolvers/zod";
+// import { useForm } from "react-hook-form";
+// import {
+//   Form,
+//   FormControl,
+//   FormField,
+//   FormItem,
+//   FormLabel,
+//   FormMessage,
+// } from "@/components/ui/form";
+
+// import { WhatsappMessage } from "@/types/types";
+// import { Button } from "../ui/button";
+// import { Textarea } from "../ui/textarea";
+// import { Input } from "../ui/input";
+// import { toast } from "sonner";
+// import { addData } from "@/app/actions";
+
+// const formSchema = z.object({
+//   phoneNumber: z.string()
+//     .min(10, {
+//       message: "Phone number must be at least 10 digits.",
+//     })
+//     .regex(/^[0-9]+$/, {
+//       message: "Phone number must contain only digits.",
+//     }),
+//   message: z.string()
+//     .min(1, {
+//       message: "Message is required.",
+//     })
+//     .regex(/^[^<>]*$/, {
+//       message: "Message cannot contain HTML tags.",
+//     })
+//     .max(4096, {
+//       message: "Message cannot exceed 4096 characters.",
+//     }),
+// });
+
+// type FormValues = z.infer<typeof formSchema>;
+
+// export const WhatsappMessageSendModel = ({
+//   isOpen,
+//   onClose,
+//   id,
+// }: {
+//   isOpen: boolean;
+//   onClose: Dispatch<SetStateAction<boolean>>;
+//   id: string | null;
+// }) => {
+//   const form = useForm<FormValues>({
+//     resolver: zodResolver(formSchema),
+//     defaultValues: {
+//       phoneNumber: "",
+//       message: "",
+//     },
+//   });
+
+//   const onSubmit = async (data: FormValues) => {
+//     const messageData = {
+//       content: data.message,
+//       phone_number: data.phoneNumber,
+//       type: "text",
+//     };
+
+//     const result = (await addData(
+//       "/api/whatsapp/messages/send",
+//       messageData
+//     )) as any;
+
+//     if (result?.status === "success") {
+//       toast.success(result.message, { position: "top-right" });
+//       form.reset();
+//       onClose(false);
+//     } else {
+//       toast.error(result.message, { position: "top-right" });
+//     }
+//   };
+
+//   const handleClose = () => {
+//     form.reset();
+//     onClose(false);
+//   };
+
+//   return (
+//     <Dialog open={isOpen} onOpenChange={handleClose}>
+//       <DialogContent className="sm:max-w-[800px] p-0">
+//         <DialogHeader className="px-6 py-4 border-b">
+//           <DialogTitle className="text-2xl font-bold text-gray-800">
+//             Send Message
+//           </DialogTitle>
+//         </DialogHeader>
+
+//         <Form {...form}>
+//           <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-6 p-6">
+//             <FormField
+//               control={form.control}
+//               name="phoneNumber"
+//               render={({ field }) => (
+//                 <FormItem>
+//                   <FormLabel>Phone Number</FormLabel>
+//                   <FormControl>
+//                     <Input placeholder="Enter phone number" {...field} />
+//                   </FormControl>
+//                   <FormMessage />
+//                 </FormItem>
+//               )}
+//             />
+
+//             <FormField
+//               control={form.control}
+//               name="message"
+//               render={({ field }) => (
+//                 <FormItem>
+//                   <FormLabel>Message</FormLabel>
+//                   <FormControl>
+//                     <Textarea
+//                       placeholder="Type your message..."
+//                       className="flex-1"
+//                       {...field}
+//                     />
+//                   </FormControl>
+//                   <FormMessage />
+//                 </FormItem>
+//               )}
+//             />
+
+//             <Button type="submit" className="bg-blue-500 text-white">
+//               Send
+//             </Button>
+//           </form>
+//         </Form>
+//       </DialogContent>
+//     </Dialog>
+//   );
+// };
 "use client";
+
 import React, { Dispatch, SetStateAction, useState } from "react";
 import {
   Dialog,
@@ -6,13 +151,39 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import * as z from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 
-import { WhatsappMessage } from "@/types/types";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
 import { Input } from "../ui/input";
 import { toast } from "sonner";
 import { addData } from "@/app/actions";
+import { Phone } from "lucide-react";
+
+const formSchema = z.object({
+  phoneNumber: z
+    .string()
+    .trim()
+    .length(10, { message: "Phone number must be exactly 10 digits." })
+    .regex(/^[0-9]+$/, { message: "Digits only." }),
+  message: z
+    .string()
+    .trim()
+    .min(1, { message: "Message is required." })
+    .max(4096, { message: "Too long. Max 4096 characters." }),
+});
+
+type FormValues = z.infer<typeof formSchema>;
 
 export const WhatsappMessageSendModel = ({
   isOpen,
@@ -23,65 +194,110 @@ export const WhatsappMessageSendModel = ({
   onClose: Dispatch<SetStateAction<boolean>>;
   id: string | null;
 }) => {
-  const [messages, setMessages] = useState<WhatsappMessage[]>([]);
-  const [newMessage, setNewMessage] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  
-  const handleSendMessage = async () => {
-    if (newMessage.trim()) {
-      const messageData = {
-          content: newMessage,
-          phone_number:phoneNumber,
-           type: "text"
-      };
-      const result = await addData("/api/whatsapp/messages/send", messageData) as any;
-      if (result?.status === "success") {
-        toast.success(result.message, { position: "top-right" });
-        setNewMessage("");
-      } else {
-        toast.error(result.message, { position: "top-right" });
-      }
+  const [loading, setLoading] = useState(false);
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      phoneNumber: "",
+      message: "",
+    },
+  });
+
+  const watchMessage = form.watch("message");
+
+  const onSubmit = async (data: FormValues) => {
+    setLoading(true);
+    const result = (await addData("/api/whatsapp/messages/send", {
+      content: data.message,
+      phone_number: data.phoneNumber,
+      type: "text",
+    })) as any;
+
+    if (result?.status === "success") {
+      toast.success(result.message, { position: "top-right" });
+      form.reset();
+      onClose(false);
+    } else {
+      toast.error(result.message, { position: "top-right" });
     }
+    setLoading(false);
   };
-  // useEffect(() => {
-  //   if (id) {
-  //     fetchDataByIdOrUrl("whatsapp-message", id).then((res) => {
-  //       setSelectedRow(res.data);
-  //     });
-  //   }
-  // },[id]);
+
+  const handleClose = () => {
+    form.reset();
+    onClose(false);
+  };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[800px] p-0">
-        <DialogHeader className="px-6 py-4 border-b">
-          <DialogTitle className="text-2xl font-bold text-gray-800">
-            Send Message
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-[600px] rounded-xl p-0 overflow-hidden">
+        <DialogHeader className="bg-blue-600 px-6 py-4">
+          <DialogTitle className="text-white text-xl font-semibold">
+            📩 Send WhatsApp Message
           </DialogTitle>
         </DialogHeader>
 
-        <div className="grid gap-6 p-6 max-h-[70vh] overflow-y-auto">
-          <Input
-            type="text"
-            placeholder="Phone Number"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-          />
-          <div className="flex gap-2">
-            <Textarea
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Type your message..."
-              className="flex-1"
+        <Form {...form}>
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="p-6 space-y-5"
+          >
+            <FormField
+              control={form.control}
+              name="phoneNumber"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                    <Phone className="w-4 h-4" />
+                    Phone Number
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter 10-digit phone number"
+                      {...field}
+                      className="focus-visible:ring-blue-500"
+                    />
+                  </FormControl>
+                  <FormMessage className="text-red-500 text-xs mt-1" />
+                </FormItem>
+              )}
             />
-            <Button
-              onClick={handleSendMessage}
-              className="bg-blue-500 text-white"
-            >
-              Send
-            </Button>
-          </div>
-        </div>
+
+            <FormField
+              control={form.control}
+              name="message"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-sm font-medium text-gray-700">
+                    Message
+                  </FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Type your message..."
+                      className="min-h-[120px] resize-none focus-visible:ring-blue-500"
+                      maxLength={4096}
+                      {...field}
+                    />
+                  </FormControl>
+                  <div className="text-xs text-right text-muted-foreground">
+                    {watchMessage?.length || 0} / 4096 characters
+                  </div>
+                  <FormMessage className="text-red-500 text-xs mt-1" />
+                </FormItem>
+              )}
+            />
+
+            <div className="flex justify-end">
+              <Button
+                type="submit"
+                disabled={loading}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md"
+              >
+                {loading ? "Sending..." : "Send Message"}
+              </Button>
+            </div>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );

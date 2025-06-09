@@ -944,7 +944,7 @@ export function DataTable<
             </TableHeader>
             <TableBody>
               {loading ? (
-                Array.from({ length: 5 }).map((_, rowIndex) => (
+                Array.from({ length: pageSize||10 }).map((_, rowIndex) => (
                   <TableRow key={rowIndex}>
                     {Array.from({ length: table.getAllColumns().length }).map(
                       (_, colIndex) => (

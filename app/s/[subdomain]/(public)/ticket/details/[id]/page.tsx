@@ -85,14 +85,14 @@ export default function TicketDetailPage() {
                   <div className="text-sm font-medium text-muted-foreground">
                     Status
                   </div>
-                  {ticket.status}
+                  <span className="capitalize">{ticket.status}</span>
                 </div>
 
                 <div className="space-y-1">
                   <div className="text-sm font-medium text-muted-foreground">
                     Priority
                   </div>
-                  {ticket.priority}
+                  <span className="capitalize">{ticket.priority}</span>
                 </div>
 
                 <div className="space-y-1">

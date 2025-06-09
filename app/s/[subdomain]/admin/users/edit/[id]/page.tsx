@@ -2,9 +2,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useState } from "react";
-
 import { useParams, useRouter } from "next/navigation";
-
 import { editData } from "@/app/actions";
 import UserForm from "@/components/custom-forms/user-form";
 

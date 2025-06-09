@@ -39,7 +39,7 @@ export function UserAuthForm() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const { subdomain } = useParams();
-  console.log("subdomain",subdomain);
+
     const form = useForm<z.infer<typeof adminFormSchema>>({
     resolver: zodResolver(adminFormSchema),
     defaultValues: {
@@ -58,13 +58,15 @@ export function UserAuthForm() {
       subdomain: subdomain as string  ,
     });
 
+   
     if (signInData?.ok) {
+       console.log("SignIn Data:if", signInData);
       router.push("/admin/dashboard");
-      setIsLoading(false);
       toast.success("Login successfully.", {
         position: "top-right",
       });
     } else {
+       console.log("SignIn Data:else", signInData);
       setIsLoading(false);
       toast.error("Invalid credentials.", {
         position: "top-right",

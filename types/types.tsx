@@ -112,20 +112,18 @@ export interface TicketType {
   updatedAt: Date;
 }
 
-export const ticketFormSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  details: z.string().min(5, "Description must be at least 5 characters"),
-  ticketCategory: z.string().min(1, "Category is required"),
-  name: z.string().min(1, "Name is required"),
-  mobileNumber: z.string().min(10, "Mobile number must be at least 10 digits"),
-  countryCode: z.string(),
-  attachments: z
-    .array(z.object({ file: z.instanceof(File) }))
-    .max(5, "Maximum 5 files allowed")
-    .optional(),
+export const ticketSchema = z.object({
+  subject: z.string().min(1, "Subject is required"),
+  description: z.string().min(10, "Description is required"),
+  priority: z.string().optional(),
+  category: z.string().optional(),
+  status: z.string().optional(),
+  assigned_to: z.string().optional(),
+  due_date: z.date().optional(),
+  contact_id: z.string().optional(),
 });
 
-export type TicketFormValues = z.infer<typeof ticketFormSchema>;
+export type TicketValues = z.infer<typeof ticketSchema>;
 
 export interface Comment {
   id: string;

@@ -14,7 +14,6 @@ export default function UsersPage() {
   const onSubmit = async (data: any) => {
     setIsPending(true);
     const result = await addData("/api/tickets", data) as any;
-     
     if (result.data.success === true) {
       toast.success(result.data.message, { position: "top-right" });
       router.push("/admin/tickets");

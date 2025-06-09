@@ -321,10 +321,6 @@ const createApiClient = async () => {
         config.headers.Authorization = `Bearer ${cachedToken}`;
       }
 
-      console.log("Request URL:", config.baseURL + config.url);
-      console.log("Role:", cachedRole);
-      console.log("Subdomain:", getSubdomain());
-
       return config;
     },
     (error) => {

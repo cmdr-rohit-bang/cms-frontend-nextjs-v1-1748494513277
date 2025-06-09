@@ -123,3 +123,17 @@ export const changeStatus = async (endpoint: string, data: any) => {
       throw error;
     }
   };
+
+  export async function verifyOTP(otp: string) {
+  if (otp === "111111") {
+    return {
+      status: "success",
+      message: "OTP verified successfully",
+    };
+  }
+
+  return {
+    status: "error",
+    message: "Invalid OTP",
+  };
+}

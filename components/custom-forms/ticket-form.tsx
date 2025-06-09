@@ -29,23 +29,12 @@ import { SelectContent } from "../ui/select";
 import { Textarea } from "../ui/textarea";
 import Link from "next/link";
 import { fetchData } from "@/app/actions";
-import { Pagination } from "@/types/types";
+import { Pagination, ticketSchema, TicketValues } from "@/types/types";
 import { Contact as ContactType } from "@/types/types";
 import { Calendar } from "../ui/calendar";
 import { format } from "date-fns";
 
-const taskSchema = z.object({
-  subject: z.string().min(1, "Subject is required"),
-  description: z.string().min(10, "Description is required"),
-  priority: z.string().optional(),
-  category: z.string().optional(),
-  status: z.string().optional(),
-  assigned_to: z.string().optional(),
-  due_date: z.date().optional(),
-  contact_id: z.string().optional(),
-});
 
-type TicketValues = z.infer<typeof taskSchema>;
 
 const TicketForm = ({
   onSubmit,
@@ -63,7 +52,7 @@ const TicketForm = ({
   isLoading: boolean;
 }) => {
   const form = useForm<TicketValues>({
-    resolver: zodResolver(taskSchema),
+    resolver: zodResolver(ticketSchema),
     defaultValues: defaultValue,
   });
 

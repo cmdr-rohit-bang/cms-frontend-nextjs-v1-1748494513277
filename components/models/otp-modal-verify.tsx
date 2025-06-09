@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import React, { useState } from "react";
 import {
   Dialog,
@@ -14,15 +14,18 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
+import { verifyOTP } from "@/app/actions";
 
 const OtpModalVerify = ({
   isOtpModalOpen,
   setIsOtpModalOpen,
   formData,
+  ticketId
 }: {
   isOtpModalOpen: boolean;
   setIsOtpModalOpen: (value: boolean) => void;
   formData: FormData | null;
+  ticketId: string;
 }) => {
   const router = useRouter();
   const [otp, setOtp] = useState("");
@@ -35,8 +38,7 @@ const OtpModalVerify = ({
       toast.success("OTP resent to your mobile number");
     } catch (error) {
       toast.error("Failed to resend OTP");
-    }
-    finally {
+    } finally {
       setIsVerifying(false);
     }
   };
@@ -47,39 +49,28 @@ const OtpModalVerify = ({
       return;
     }
 
-   
-    // setIsVerifying(true);
-    // try {
-    //   // Verify OTP
-    //   const verificationResult = await verifyOTP(
-    //     formData?.get("mobileNumber") as string,
-    //     otp
-    //   );
+    setIsVerifying(true);
+    try {
+      // Verify OTP
+      const verificationResult = await verifyOTP(otp);
 
-    //   if (verificationResult.status === "success") {
-    //     if (!formData) {
-    //       toast.error("Form data is missing");
-    //       return;
-    //     }
-    //     // Create ticket with contact
-    //     const result = await createTicketWithContact(formData, false);
-
-    //     if (result.status === "success") {
-    //       const ticketData = result.data as TicketResponse;
-    //       toast.success("Ticket created  successfully!");
-    //       setIsOtpModalOpen(false);
-    //       router.push(`/ticket/success?id=${ticketData?.id}`);
-    //     } else {
-    //       toast.error(result.message);
-    //     }
-    //   } else {
-    //     toast.error("Invalid OTP. Please try again.");
-    //   }
-    // } catch (error:any) {
-    //   toast.error(error.message);
-    // } finally {
-    //   setIsVerifying(false);
-    // }
+      if (verificationResult.status === "success") {
+        if (!formData) {
+          toast.error("Form data is missing");
+          return;
+        }
+        // Create ticket with contact
+        toast.success("Ticket created  successfully!");
+        setIsOtpModalOpen(false);
+        router.push(`/ticket/success?id=${ticketId}`);
+      } else {
+        toast.error("Invalid OTP. Please try again.");
+      }
+    } catch (error: any) {
+      toast.error(error.message);
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   return (

@@ -12,7 +12,6 @@ export default function UsersPage() {
 
   const handleSubmit = async (data: any) => {
     if (!data) return;
-
     setIsPending(true);
 
     try {
@@ -35,8 +34,7 @@ export default function UsersPage() {
         });
       }
     } catch (error: any) {
-      toast.error("Request failed!", { position: "top-right" });
-      console.error("Submission error:", error);
+      toast.error(error ||"Request failed!", { position: "top-right" });
     } finally {
       setIsPending(false);
     }
