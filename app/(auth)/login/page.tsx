@@ -34,7 +34,6 @@ export default function LoginPage() {
 
     if (signInData?.ok) {
       router.push("/admin/dashboard");
-      setIsLoading(false);
       toast.success("Login successfully.", {
         position: "top-right",
       });
