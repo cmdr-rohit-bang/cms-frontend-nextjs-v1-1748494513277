@@ -45,7 +45,7 @@ export default function WhatsappMessagePage() {
       });
 
       const response = (await fetchData(
-        `api/whatsapp/messages?${params.toString()}`
+        `api/whatsapp/messages/grouped?${params.toString()}`
       )) as {
         data: WhatsappMessage[];
         pagination: Pagination;
@@ -76,10 +76,10 @@ export default function WhatsappMessagePage() {
       accessorKey: "content",
       header: "Message",
       cell: ({ row }: { row: any }) => {
-        const message = row.original.content; // Assuming row.original contains the message data
+        const message = row.original.latest_message.content; // Assuming row.original contains the message data
         return (
           <p>
-            {message.length > 100 ? message.slice(0, 100) + "..." : message}
+            {message > 100 ? message.slice(0, 100) + "..." : message}
           </p>
         );
       },
@@ -89,7 +89,7 @@ export default function WhatsappMessagePage() {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }: { row: any }) => {
-        const message = row.original; // Assuming row.original contains the message data
+        const message = row.original.latest_message; // Assuming row.original contains the message data
         return (
           <BadgeStatus
             status={
@@ -110,7 +110,7 @@ export default function WhatsappMessagePage() {
       accessorKey: "created_at",
       header: "Date",
       cell: ({ row }) => {
-        const date = row.getValue("created_at");
+        const date = row.original.latest_message.created_at;
         return date ? formatDate(date) : "-";
       },
     },

@@ -151,8 +151,18 @@ export interface WhatsappMessage {
 export interface Messages {
   direction: string;
   content: string;
+  contact_id: string;
   created_at:Date
+  latest_message: LatestMessage;
   phone_number: string;
   sent_by_admin_id: string;
   status: 'sent' | 'delivered' | 'read' | 'failed' | 'pending' | 'scheduled';
+}
+
+export interface LatestMessage {
+  id: string;
+  content: string;
+  direction: string;
+  status: 'sent' | 'delivered' | 'read' | 'failed' | 'pending' | 'scheduled';
+  created_at: Date;
 }
