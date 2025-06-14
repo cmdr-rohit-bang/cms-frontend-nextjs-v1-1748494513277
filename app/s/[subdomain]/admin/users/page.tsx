@@ -6,7 +6,7 @@ import { Column, Pagination, User as UserType } from "@/types/types";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { fetchData } from "@/app/actions";
-import {  UserRoundCheck } from "lucide-react";
+import { UserRoundCheck } from "lucide-react";
 import Image from "next/image";
 import { DeleteConfirmationDialog } from "@/components/models/delete-modal";
 
@@ -41,8 +41,8 @@ export default function UsersPage() {
 
       setData(response.data || []);
       setTotalPages(response.pagination?.total_pages || 1);
-    } catch (error:any) {
-      toast.error(error.message||"Failed to fetch tickets");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to fetch tickets");
     } finally {
       setLoading(false);
     }
@@ -75,11 +75,13 @@ export default function UsersPage() {
 
   const confirmDelete = async () => {
     try {
-      await fetchData(`/auth/tenant/verify-token?token${emailVerificationToken}`);
+      await fetchData(
+        `/auth/tenant/verify-token?token${emailVerificationToken}`
+      );
       toast.success("user verify successfully");
       await fetchUser(currentPage, pageSize, searchQuery);
-    } catch (error:any) {
-      toast.error(error.message||"Failed to user verify");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to user verify");
     } finally {
       closeDeleteDialog();
     }
@@ -100,16 +102,25 @@ export default function UsersPage() {
       id: "role",
       accessorKey: "role",
       header: "Role",
+      cell({ row }) {
+        return row.getValue("role") || "-";
+      },
     },
     {
       id: "email",
       accessorKey: "email",
       header: "Email",
+      cell({ row }) {
+        return row.getValue("email") || "-";
+      },
     },
     {
       id: "phone_number",
       accessorKey: "phone_number",
       header: "Phone Number",
+      cell({ row }) {
+        return row.getValue("phone_number") || "-";
+      },
     },
     {
       id: "status",
@@ -117,7 +128,7 @@ export default function UsersPage() {
       header: "Status",
       cell: ({ row }: { row: any }) => {
         const status = row.original.status;
-        const emailToken = row.original.email_verification_token
+        const emailToken = row.original.email_verification_token;
         return status === "pending" ? (
           <Image
             src={`http://${process.env.NEXT_PUBLIC_DOMIAN_URL}/icons/user-warning.svg`}
@@ -125,9 +136,9 @@ export default function UsersPage() {
             width={24}
             height={24}
             className="object-cover cursor-pointer grayscale"
-            onClick={()=>{
-              setIsDeleteDialogOpen(true)
-              setEmailVerificationToken(emailToken)
+            onClick={() => {
+              setIsDeleteDialogOpen(true);
+              setEmailVerificationToken(emailToken);
             }}
           />
         ) : (

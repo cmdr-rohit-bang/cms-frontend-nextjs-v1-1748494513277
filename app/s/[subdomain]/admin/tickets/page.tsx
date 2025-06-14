@@ -441,9 +441,9 @@ export default function TicketsPage() {
       accessorKey: "assigned_to",
       header: "Assigned To",
       cell: ({ row }) => {
-        const user = row.getValue("assigned_to") || "-";
+        const user = row.getValue("assigned_to") ;
         const contact = tableContacts.find((c) => c.value === user);
-        return contact?.label;
+        return contact?.label  || "-";
       },
     },
     {

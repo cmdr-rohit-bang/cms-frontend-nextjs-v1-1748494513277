@@ -71,8 +71,8 @@ export default function ContactsPage() {
 
       setData(response.data || (response.data as ContactType[])); // Handle both formats
       setTotalPages(response.pagination?.total_pages || 1);
-    } catch (error:any) {
-      toast.error(error.message|| "Error fetching contacts:");
+    } catch (error: any) {
+      toast.error(error.message || "Error fetching contacts:");
     } finally {
       setLoading(false);
     }
@@ -119,8 +119,8 @@ export default function ContactsPage() {
       const res = await importData("/api/contacts/import", formData);
       fetchContacts(currentPage, pageSize, searchQuery);
       toast.success("Contacts imported successfully");
-    } catch (error:any) {
-      toast.error(error.message || "Import failed:", );
+    } catch (error: any) {
+      toast.error(error.message || "Import failed:");
     }
   };
 
@@ -143,8 +143,8 @@ export default function ContactsPage() {
         setData((prev) => prev.filter((c) => c.id !== itemToDelete.id));
         toast.success("Contact deleted successfully");
         fetchContacts(currentPage, pageSize, searchQuery);
-      } catch (error:any) {
-        toast.error(error.message||"Failed to delete contact");
+      } catch (error: any) {
+        toast.error(error.message || "Failed to delete contact");
       }
     }
 
@@ -161,8 +161,8 @@ export default function ContactsPage() {
         } else {
           toast.error(res.message);
         }
-      } catch (error:any) {
-        toast.error(error.message||"Failed to delete contacts");
+      } catch (error: any) {
+        toast.error(error.message || "Failed to delete contacts");
       }
     }
 
@@ -255,22 +255,34 @@ export default function ContactsPage() {
       id: "name",
       accessorKey: "name",
       header: "Name",
+       cell({ row }) {
+        return row.getValue("name") || "-";
+      },
     },
 
     {
       id: "email",
       accessorKey: "email",
       header: "Email",
+       cell({ row }) {
+        return row.getValue("email") || "-";
+      },
     },
     {
       id: "phone",
       accessorKey: "phone",
       header: "Mobile Number",
+      cell({ row }) {
+        return row.getValue("phone") || "-";
+      },
     },
     {
       id: "company",
       accessorKey: "company",
       header: "Company Name",
+      cell({ row }) {
+        return row.getValue("company") || "-";
+      },
     },
     {
       id: "address",

@@ -118,7 +118,7 @@ export const ticketSchema = z.object({
   priority: z.string().optional(),
   category: z.string().optional(),
   status: z.string().optional(),
-  assigned_to: z.string().optional(),
+  assigned_to: z.string().optional().nullable(),
   due_date: z.date().optional(),
   contact_id: z.string().optional(),
 });

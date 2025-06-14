@@ -33,7 +33,7 @@ export default function UsersPage() {
     description: "",
     priority: "",
     category: "",
-    assigned_to: "", 
+    assigned_to: null, 
     status:"",
     due_date: new Date()
   };
