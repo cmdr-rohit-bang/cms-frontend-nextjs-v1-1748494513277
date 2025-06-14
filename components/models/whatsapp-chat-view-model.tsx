@@ -37,12 +37,13 @@ export const WhatsappChatViewModel = ({
   };
 
   const handleSendMessage = async () => {
-    if (!newMessage.trim()) {
+    try {
+      if (!newMessage.trim()) {
       toast.error("Please enter a message", { position: "top-right" });
       return;
-    }
+      }
 
-    if (phone_number !== null) {
+      if (phone_number !== null) {
       const messageData = {
         phone_number,
         content: newMessage.trim(),
@@ -57,6 +58,10 @@ export const WhatsappChatViewModel = ({
       } else {
         toast.error(result.data.message, { position: "top-right" });
       }
+      }
+    } catch (error) {
+      toast.error("Failed to send message", { position: "top-right" });
+      console.error("Error sending message:", error);
     }
   };
 

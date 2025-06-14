@@ -12,15 +12,20 @@ export default function UsersPage() {
   const [isPending, setIsPending] = useState(false);
 
   const onSubmit = async (data: any) => {
-    setIsPending(true);
-    const result = await addData("/api/tickets", data) as any;
-    if (result.data.success === true) {
+    try {
+      setIsPending(true);
+      const result = await addData("/api/tickets", data) as any;
+      if (result.data.success === true) {
       toast.success(result.data.message, { position: "top-right" });
       router.push("/admin/tickets");
-    } else {
+      } else {
       toast.error(result.message, { position: "top-right" });
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Something went wrong", { position: "top-right" });
+    } finally {
+      setIsPending(false);
     }
-    setIsPending(false);
   };
 
   const defaultValue = {

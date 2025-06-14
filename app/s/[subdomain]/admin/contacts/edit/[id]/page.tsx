@@ -22,16 +22,21 @@ export default function UsersPage() {
   }, [params.id]);
 
   const onSubmit = async (data: any) => {
-    setIsPending(true);
-    const result = (await editData(`/api/contacts/${params.id}`, data)) as any;
+    try {
+      setIsPending(true);
+      const result = (await editData(`/api/contacts/${params.id}`, data)) as any;
 
-    if (result.success === true) {
+      if (result.success === true) {
       toast.success(result.message, { position: "top-right" });
       router.push("/admin/contacts");
-    } else {
+      } else {
       toast.error(result.message, { position: "top-right" });
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Something went wrong", { position: "top-right" });
+    } finally {
+      setIsPending(false);
     }
-    setIsPending(false);
   };
 
   const defaultValue = {

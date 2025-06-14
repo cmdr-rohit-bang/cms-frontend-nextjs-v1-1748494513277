@@ -21,15 +21,20 @@ export default function UsersPage() {
   }, [params.id]);
 
   const onSubmit = async (data: any) => {
-    setIsPending(true);
-    const result = await editData(`/api/tickets/${params.id}`, data) as any;
-    if (result.success === true) {
+    try {
+      setIsPending(true);
+      const result = await editData(`/api/tickets/${params.id}`, data) as any;
+      if (result.success === true) {
       toast.success(result.message, { position: "top-right" });
       router.push("/admin/tickets");
-    } else {
+      } else {
       toast.error(result.data.message, { position: "top-right" });
+      }
+    } catch (error: any) {
+      toast.error(error.message || "Something went wrong!", { position: "top-right" });
+    } finally {
+      setIsPending(false);
     }
-    setIsPending(false);
   };
 
   const defaultValue = {

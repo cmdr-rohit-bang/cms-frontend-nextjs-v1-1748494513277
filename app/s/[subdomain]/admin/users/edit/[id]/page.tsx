@@ -14,17 +14,22 @@ export default function UsersPage() {
   const [isPending, setIsPending] = useState(false);
 
   const handleSubmit = async (formData: FormData) => {
-    if (!formData) return;
-    setIsPending(true);
-    const result = await editData(`/admin/users/${id}`, formData) as any;
+    try {
+      if (!formData) return;
+      setIsPending(true);
+      const result = await editData(`/admin/users/${id}`, formData) as any;
 
-    if (result?.status === "success") {
+      if (result?.status === "success") {
       toast.success(result.message, { position: "top-right" });
       router.push("/admin/users");
-    } else {
+      } else {
       toast.error(result.message, { position: "top-right" });
+      }
+    } catch (error) {
+      toast.error("Something went wrong!", { position: "top-right" });
+    } finally {
+      setIsPending(false);
     }
-    setIsPending(false);
   };
 
   const defaultValue = {

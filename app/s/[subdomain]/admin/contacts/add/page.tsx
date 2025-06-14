@@ -23,15 +23,20 @@ export default function UsersPage() {
   };
 
   const onSubmit = async (data: any) => {
-    setIsPending(true);
-    const result = await addData("/api/contacts", data) as any;
-    if (result?.data?.success === true) {
+    try {
+      setIsPending(true);
+      const result = await addData("/api/contacts", data) as any;
+      if (result?.data?.success === true) {
       toast.success(result.data.message, { position: "top-right" });
       router.push("/admin/contacts");
-    } else {
+      } else {
       toast.error(result.data.message, { position: "top-right" });
+      }
+    } catch (error) {
+      toast.error("An error occurred while adding contact", { position: "top-right" });
+    } finally {
+      setIsPending(false);
     }
-    setIsPending(false);
   };
 
   return (
