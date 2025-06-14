@@ -11,13 +11,13 @@ export default function TenantPage({
   params: Promise<{ subdomain: string }>;
 }) {
   const resolvedParams = use(params);
-
+  const companyName  = resolvedParams.subdomain== "acme" ? "Acme" :"Bang Enterprises" 
   return (
     <div className="min-h-screen flex items-center justify-center">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl text-center">
-            Welcome to {resolvedParams.subdomain}
+            Welcome to {companyName}
           </CardTitle>
           <p className="text-center text-muted-foreground">
             Enter your credentials to access your account

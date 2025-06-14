@@ -68,9 +68,11 @@ const contactSchema = z.object({
   phone: z.string().optional(),
   company: z.string().optional(),
   address: z.string().optional(),
-  tags: z.array(z.string()).min(1, "At least one tag is required"),
+  // Make tags optional
+  tags: z.array(z.string()).optional().default([]),
   notes: z.string().optional(),
-  custom_fields: customFieldSchema,
+  // Make custom fields optional
+  custom_fields: customFieldSchema.optional().default([])
 });
 
 const ContactForm = ({
@@ -123,36 +125,55 @@ const ContactForm = ({
   // Handle form submission
   const handleSubmit = (data: ContactValues) => {
     // Filter out empty custom fields
-    const objectifiedCustomFields = data.custom_fields.reduce((acc, field) => {
-      const key = field.key?.trim();
-      const value = field.value?.trim();
-      if (key && value) {
-        acc[key] = value;
+    const filteredCustomFields = data.custom_fields?.filter(
+      field => field.key?.trim() && field.value?.trim()
+    ) || [];
+
+    // Convert custom fields to object format
+    const objectifiedCustomFields = filteredCustomFields.reduce((acc, field) => {
+      if (field.key && field.value) {
+        try {
+          // Try to parse JSON if the value is a stringified object
+          const parsedValue = JSON.parse(field.value);
+          acc[field.key.trim()] = parsedValue;
+        } catch {
+          // If not JSON, use the string value as is
+          acc[field.key.trim()] = field.value.trim();
+        }
       }
       return acc;
-    }, {} as Record<string, string>);
+    }, {} as Record<string, any>);
 
     const finalData = {
       ...data,
-      custom_fields: objectifiedCustomFields,
+      tags: data.tags || [],
+      custom_fields: Object.keys(objectifiedCustomFields).length > 0 
+        ? objectifiedCustomFields 
+        : undefined
     };
 
     onSubmit(finalData);
   };
 
   useEffect(() => {
-    const initialCustomFields = defaultValue.custom_fields && 
-    typeof defaultValue.custom_fields === 'object'
-    ? Object.entries(defaultValue.custom_fields).map(([key, value]) => ({
-        key,
-        value: value as string
-      }))
-    : [{ key: "", value: "" }];
+    let initialCustomFields = [{ key: "", value: "" }];
+    
+    if (defaultValue.custom_fields) {
+      if (typeof defaultValue.custom_fields === 'object' && !Array.isArray(defaultValue.custom_fields)) {
+        // Convert object to array of key-value pairs
+        initialCustomFields = Object.entries(defaultValue.custom_fields).map(([key, value]) => ({
+          key,
+          value: typeof value === 'object' ? JSON.stringify(value) : String(value) // Handle object values
+        }));
+      }
+    }
 
-  form.reset({
-    ...defaultValue,
-    custom_fields: initialCustomFields
-  });
+    // Reset form with properly formatted data
+    form.reset({
+      ...defaultValue,
+      tags: defaultValue.tags || [],
+      custom_fields: initialCustomFields
+    });
   }, [defaultValue, form]);
 
   return (
