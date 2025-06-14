@@ -40,7 +40,14 @@ export const DeleteConfirmationDialog = ({
             }}
             className={`${isDestruct ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"   :  "bg-green-500 hover:bg-green-900"   }   disabled:bg-gray-400`}
           >
-            {isLoading ? confirmLabel+'...' :confirmLabel }
+                        {isLoading ? (
+              <span className="flex items-center gap-2">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                {confirmLabel + "..."}
+              </span>
+            ) : (
+              confirmLabel
+            )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

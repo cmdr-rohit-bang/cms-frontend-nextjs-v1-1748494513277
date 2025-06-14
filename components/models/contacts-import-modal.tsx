@@ -29,7 +29,7 @@ export const ContactsImportModal = ({
   onConfirm,
   title = "Import Contacts",
   description = "Are you sure you want to import contacts? This action cannot be undone.",
-  confirmLabel = "Confirm",
+  confirmLabel = "Import",
   cancelLabel = "Cancel",
   isLoading = false,
 }: ContactsImportModalProps) => {
@@ -45,7 +45,7 @@ export const ContactsImportModal = ({
     }
     onConfirm(contacts);
     setContacts(null);
-    onClose();
+
   };
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>

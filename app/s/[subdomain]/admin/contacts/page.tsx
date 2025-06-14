@@ -127,10 +127,12 @@ export default function ContactsPage() {
       }
       fetchContacts(currentPage, pageSize, searchQuery);
       toast.success(res.message || "Contacts imported successfully");
+      
     } catch (error: any) {
       toast.error(error.message || "Import failed:");
     } finally {
       setIsImportLoading(false);
+      setIsImportModalOpen(false)
     }
   };
 
@@ -214,6 +216,7 @@ export default function ContactsPage() {
     } finally {
       setIsTagsLoading(false);
       setIsTagsModalOpen(false);
+      
     }
   };
 
