@@ -92,30 +92,35 @@ export default function TicketDetailPage() {
                   <div className="text-sm font-medium text-muted-foreground">
                     Priority
                   </div>
-                <span className="capitalize">  {ticket.priority}</span>
+                  <span className="capitalize"> {ticket.priority}</span>
                 </div>
-
-                <div className="space-y-1">
-                  <div className="text-sm font-medium text-muted-foreground">
-                    Assigned To
+                {ticket.assigned_admin?.first_name && (
+                  <div className="space-y-1">
+                    <div className="text-sm font-medium text-muted-foreground">
+                      Assigned To
+                    </div>
+                    {ticket.assigned_admin?.first_name}&nbsp;{" "}
+                    {ticket.assigned_admin?.last_name}
                   </div>
-                  {ticket.assigned_admin?.first_name }&nbsp; {ticket.assigned_admin?.last_name }
-                </div>
+                )}
 
                 <Separator />
+                {ticket?.contact_name ||
+                  (ticket?.contact?.email && (
+                    <div className="space-y-1">
+                      <div className="text-sm font-medium text-muted-foreground">
+                        Customer
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <User className="h-4 w-4 text-muted-foreground" />
+                        <span>{ticket?.contact_name}</span>
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {ticket?.contact?.email}
+                      </div>
+                    </div>
+                  ))}
 
-                <div className="space-y-1">
-                  <div className="text-sm font-medium text-muted-foreground">
-                    Customer
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4 text-muted-foreground" />
-                    <span>{ticket?.contact_name}</span>
-                  </div>
-                  <div className="text-sm text-muted-foreground">
-                     {ticket?.contact?.email}
-                  </div>
-                </div>
                 <div className="space-y-1">
                   <div className="text-sm font-medium text-muted-foreground">
                     Created

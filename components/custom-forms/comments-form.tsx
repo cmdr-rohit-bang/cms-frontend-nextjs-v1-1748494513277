@@ -64,8 +64,8 @@ const Comments = ({
         className="min-h-[100px]"
       />
       {form.formState.errors.message && (
-        <p className="text-sm text-red-500">
-          {form.formState.errors.message.message}
+        <p className="text-sm text-red-500 mt-1">
+          {form.formState?.errors?.message?.message}
         </p>
       )}
 

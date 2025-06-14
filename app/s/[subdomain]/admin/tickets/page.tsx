@@ -98,6 +98,11 @@ export default function TicketsPage() {
   );
   const [contactsLoading, setContactsLoading] = useState(false);
 
+  // Add these state declarations near your other useState declarations
+  const [isDeleteLoading, setIsDeleteLoading] = useState(false);
+  const [isTagsActionLoading, setIsTagsActionLoading] = useState(false);
+  const [isChangeActionLoading, setIsChangeActionLoading] = useState(false);
+
   const fetchTickets = async (
     page: number = currentPage,
     limit: number = pageSize,
@@ -181,6 +186,7 @@ export default function TicketsPage() {
   };
 
   const confirmDelete = async () => {
+    setIsDeleteLoading(true);
     try {
       if (deleteMode === "single" && itemToDelete) {
         await deleteData(`/api/tickets/${itemToDelete.id}`);
@@ -196,6 +202,7 @@ export default function TicketsPage() {
     } catch (error:any) {
       toast.error(error.message || "Failed to delete tickets");
     } finally {
+      setIsDeleteLoading(false);
       closeDeleteDialog();
     }
   };
@@ -221,6 +228,7 @@ export default function TicketsPage() {
 
   const handleTagsConfirm = async (ids: string[], tags: string[]) => {
     try {
+      setIsTagsActionLoading(true);
       const action = tagsModalMode === "add" ? "add_tags" : "remove_tags";
       await addTagsAndRemoveTags(`/api/tickets/bulk-action`, {
         ticket_ids: ids,
@@ -235,6 +243,7 @@ export default function TicketsPage() {
       toast.error(error.message || "Failed to update tags");
     } finally {
       setIsTagsModalOpen(false);
+      setIsTagsActionLoading(false);
     }
   };
 
@@ -269,7 +278,7 @@ export default function TicketsPage() {
     openChangeModal("assigned_to", ids);
 
   const handleChangeConfirm = async (value: string) => {
-    setContactsLoading(true);
+    setIsChangeActionLoading(true);
     try {
       const { type } = changeModalState;
       if (!type) return;
@@ -292,8 +301,8 @@ export default function TicketsPage() {
     } catch (error) {
       toast.error(`Failed to update ${changeModalState.type}`);
     } finally {
+      setIsChangeActionLoading(false);
       closeChangeModal();
-      setContactsLoading(false);
     }
   };
 
@@ -537,6 +546,7 @@ export default function TicketsPage() {
             ? "Are you sure you want to delete these tickets? This action cannot be undone."
             : "Are you sure you want to delete this ticket? This action cannot be undone."
         }
+        isLoading={isDeleteLoading}
       />
 
       {/* Tags Modal */}
@@ -562,7 +572,7 @@ export default function TicketsPage() {
         }
         confirmLabel={tagsModalMode === "add" ? "Add" : "Remove"}
         cancelLabel="Cancel"
-        isLoading={false}
+        isLoading={isTagsActionLoading}
       />
 
       {/* Universal Change Modal */}
@@ -577,7 +587,7 @@ export default function TicketsPage() {
           useCombobox={modalConfig.useCombobox}
           placeholder={modalConfig.placeholder}
           selectedCount={selectedIds.length}
-          isLoading={modalConfig.isLoading}
+          isLoading={isChangeActionLoading}
           onSearch={debouncedSearch}
         />
       )}

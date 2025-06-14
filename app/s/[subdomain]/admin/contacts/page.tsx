@@ -116,9 +116,12 @@ export default function ContactsPage() {
     const formData = new FormData();
     formData.append("file", contacts);
     try {
-      const res = await importData("/api/contacts/import", formData);
+      const res:any = await importData("/api/contacts/import", formData);
+      if (res.success !== true) {
+        return toast.error(res.message || "Import failed:");
+      }
       fetchContacts(currentPage, pageSize, searchQuery);
-      toast.success("Contacts imported successfully");
+      toast.success(res.message ||"Contacts imported successfully");
     } catch (error: any) {
       toast.error(error.message || "Import failed:");
     }
@@ -203,7 +206,6 @@ export default function ContactsPage() {
   };
 
   const handleRemoveTags = (ids: string[]) => {
-    console.log("remove-tags", ids);
     setTagsModalMode("remove");
     setIsTagsModalOpen(true);
     setSelectedIds(ids);
@@ -211,7 +213,6 @@ export default function ContactsPage() {
   };
 
   const handleAddCustomField = (ids: string[]) => {
-    console.log("add-custom-field", ids);
     setCustomFieldsId(ids);
     setIsCustomFieldModalOpen(true);
     fetchContacts(currentPage, pageSize, searchQuery);
