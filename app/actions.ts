@@ -1,4 +1,5 @@
 import apiClient from "@/lib/api-client";
+import formDataClient from "@/lib/api-client-form-data";
 import { ApiError } from "@/types/types";
 
 export const fetchData = async (endpoint: string) => {
@@ -96,7 +97,7 @@ export const changeStatus = async (endpoint: string, data: any) => {
 
   export const importData = async (endpoint: string, data: any) => {
     try {
-      const response = await apiClient.post(endpoint, data);
+      const response = await formDataClient.submit(endpoint, data ,"POST");
       return response.data;
     } catch (error) {
       console.error("Error exporting data:", error);
