@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Grid3X3, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { signIn } from "next-auth/react";
-import { toast } from "sonner";
+import { toast, Toaster } from "sonner";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -231,6 +231,7 @@ export default function LoginPage() {
           </ul>
         </div>
       </div>
+      <Toaster/>
     </div>
   );
 }
