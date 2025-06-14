@@ -85,7 +85,7 @@ export default function TicketDetailPage() {
                   <div className="text-sm font-medium text-muted-foreground">
                     Status
                   </div>
-                  <span className="capitalize">{ticket.status} </span>
+                  <span > <BadgeStatus status={ticket.status}  /> </span>
                 </div>
 
                 <div className="space-y-1">
@@ -105,8 +105,7 @@ export default function TicketDetailPage() {
                 )}
 
                 <Separator />
-                {ticket?.contact_name ||
-                  (ticket?.contact?.email && (
+                {ticket?.contact_name && 
                     <div className="space-y-1">
                       <div className="text-sm font-medium text-muted-foreground">
                         Customer
@@ -119,7 +118,7 @@ export default function TicketDetailPage() {
                         {ticket?.contact?.email}
                       </div>
                     </div>
-                  ))}
+                  }
 
                 <div className="space-y-1">
                   <div className="text-sm font-medium text-muted-foreground">
