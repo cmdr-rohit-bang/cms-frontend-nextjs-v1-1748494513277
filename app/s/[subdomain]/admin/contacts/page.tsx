@@ -340,29 +340,14 @@ export default function ContactsPage() {
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="flex flex-wrap gap-1">
-                    {tags.map((tag: string, index: number) => {
-                      // Define color variants for badges
-                      const colorVariants = [
-                        "bg-blue-100 text-blue-800 border-blue-200",
-                        "bg-green-100 text-green-800 border-green-200",
-                        "bg-purple-100 text-purple-800 border-purple-200",
-                        "bg-yellow-100 text-yellow-800 border-yellow-200",
-                        "bg-pink-100 text-pink-800 border-pink-200",
-                      ];
-
-                      // Get color variant based on index
-                      const colorClass =
-                        colorVariants[index % colorVariants.length];
-
-                      return (
-                        <span
-                          key={index}
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${colorClass}`}
-                        >
-                          {tag}
-                        </span>
-                      );
-                    })}
+                    {tags.map((tag: string, index: number) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-white text-gray-700 border-gray-200"
+                      >
+                        {tag}
+                      </span>
+                    ))}
                   </div>
                 </PopoverContent>
               </Popover>

@@ -6,6 +6,7 @@ import {
   Pagination,
   TicketType,
   Contact as ContactType,
+  User,
 } from "@/types/types";
 import { DataTable } from "@/components/shared/data-table/data-table";
 import {
@@ -78,9 +79,10 @@ export default function TicketsPage() {
   const [idsToDelete, setIdsToDelete] = useState<string[] | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [deleteMode, setDeleteMode] = useState<DeleteMode | null>(null);
-  const [tableContacts, setTableContacts] = useState<
+  const [UsersData, setUsersData] = useState<
     { label: string; value: string }[]
   >([]);
+
   // Tags modal state
   const [isTagsModalOpen, setIsTagsModalOpen] = useState(false);
   const [tagsModalMode, setTagsModalMode] = useState<TagsMode | null>(null);
@@ -124,7 +126,7 @@ export default function TicketsPage() {
       };
       setData(response.data || []);
       setTotalPages(response.pagination?.total_pages || 1);
-    } catch (error:any) {
+    } catch (error: any) {
       toast.error(error.message || "Failed to fetch tickets");
     } finally {
       setLoading(false);
@@ -147,10 +149,25 @@ export default function TicketsPage() {
       }));
       if (forSearch) {
         setContacts(formattedContacts);
-      } else {
-        setTableContacts(formattedContacts);
       }
-    } catch (error:any) {
+    } catch (error: any) {
+      toast.error(error.message || "Failed to fetch contacts");
+    } finally {
+      setContactsLoading(false);
+    }
+  };
+  const fetchUsers = async () => {
+    try {
+      const res = (await fetchData(`/auth/tenant/all`)) as {
+        data: User[];
+      };
+      const resData = res?.data || [];
+      const formattedContacts = resData.map((user: any) => ({
+        label: user.first_name + " " + user.last_name,
+        value: user.id,
+      }));
+      setUsersData(formattedContacts);
+    } catch (error: any) {
       toast.error(error.message || "Failed to fetch contacts");
     } finally {
       setContactsLoading(false);
@@ -159,13 +176,13 @@ export default function TicketsPage() {
 
   useEffect(() => {
     fetchTickets();
+    fetchUsers();
     fetchContacts("", false); // Initial fetch for table contacts
   }, []);
 
   const debouncedSearch = debounce((search: string) => {
     fetchContacts(search, true);
   }, 300);
-
 
   const handleAdd = () => router.push("/admin/tickets/add");
   const handleEdit = (ticket: any) =>
@@ -199,7 +216,7 @@ export default function TicketsPage() {
         toast.success(`${idsToDelete.length} tickets deleted successfully`);
       }
       await fetchTickets(currentPage, pageSize, searchQuery);
-    } catch (error:any) {
+    } catch (error: any) {
       toast.error(error.message || "Failed to delete tickets");
     } finally {
       setIsDeleteLoading(false);
@@ -239,14 +256,13 @@ export default function TicketsPage() {
         `Tags ${tagsModalMode === "add" ? "added" : "removed"} successfully`
       );
       await fetchTickets(currentPage, pageSize, searchQuery);
-    } catch (error:any) {
+    } catch (error: any) {
       toast.error(error.message || "Failed to update tags");
     } finally {
       setIsTagsModalOpen(false);
       setIsTagsActionLoading(false);
     }
   };
-
 
   const openChangeModal = (type: ModalType, ids: string[]) => {
     setChangeModalState({ type, open: true });
@@ -255,18 +271,18 @@ export default function TicketsPage() {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    fetchTickets(page, pageSize,searchQuery);
+    fetchTickets(page, pageSize, searchQuery);
   };
 
   const handlePageSizeChange = (newPageSize: number) => {
     setPageSize(newPageSize);
-    setCurrentPage(1); 
-    fetchTickets(1, newPageSize,searchQuery);
+    setCurrentPage(1);
+    fetchTickets(1, newPageSize, searchQuery);
   };
 
-    const handleSearch = (query: string) => {
+  const handleSearch = (query: string) => {
     setSearchQuery(query);
-    setCurrentPage(1); 
+    setCurrentPage(1);
     fetchTickets(1, pageSize, query);
   };
   const handleChangeStatus = (ids: string[]) => openChangeModal("status", ids);
@@ -395,30 +411,16 @@ export default function TicketsPage() {
                   className="w-[200px] p-3 max-w-md"
                   onClick={(e) => e.stopPropagation()}
                 >
-                <div className="flex flex-wrap gap-1">
-                  {tags.map((tag: string, index: number) => {
-                    // Define color variants for badges
-                    const colorVariants = [
-                      'bg-blue-100 text-blue-800 border-blue-200',
-                      'bg-green-100 text-green-800 border-green-200',
-                      'bg-purple-100 text-purple-800 border-purple-200',
-                      'bg-yellow-100 text-yellow-800 border-yellow-200',
-                      'bg-pink-100 text-pink-800 border-pink-200'
-                    ];
-
-                    // Get color variant based on index
-                    const colorClass = colorVariants[index % colorVariants.length];
-
-                    return (
+                  <div className="flex flex-wrap gap-1">
+                    {tags.map((tag: string, index: number) => (
                       <span
                         key={index}
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${colorClass}`}
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border bg-white text-gray-700 border-gray-200"
                       >
                         {tag}
                       </span>
-                    );
-                  })}
-                </div>
+                    ))}
+                  </div>
                 </PopoverContent>
               </Popover>
             ) : (
@@ -450,9 +452,9 @@ export default function TicketsPage() {
       accessorKey: "assigned_to",
       header: "Assigned To",
       cell: ({ row }) => {
-        const user = row.getValue("assigned_to") ;
-        const contact = tableContacts.find((c) => c.value === user);
-        return contact?.label  || "-";
+        const assignedTo = row.getValue("assigned_to");
+        const contact = UsersData.find((user) => user.value === assignedTo);
+        return contact?.label || "-";
       },
     },
     {
@@ -461,7 +463,7 @@ export default function TicketsPage() {
       header: "Due Date",
       cell: ({ row }) => {
         const date = row.getValue("due_date");
-        return date ? formatDate(date) : "-"
+        return date ? formatDate(date) : "-";
       },
     },
   ];
@@ -483,12 +485,12 @@ export default function TicketsPage() {
         pageSize={pageSize}
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
-         pagination={{
+        pagination={{
           has_next: currentPage < totalPages,
           has_previous: currentPage > 1,
         }}
-         searchable={true}
-         onSearch={handleSearch}
+        searchable={true}
+        onSearch={handleSearch}
         basePath="/admin/tickets"
         onDelete={openDeleteConfirmation}
         selection={{
