@@ -54,7 +54,7 @@ const getSubdomain = (): string | null => {
   return null;
 };
 
-// Get the correct API base URL (keeping your original logic)
+// 🔧 FIXED: Get the correct API base URL - NO MORE SUBDOMAIN-BASED BACKEND URLs
 const getApiBaseUrl = async (): Promise<string> => {
   // Get session if not cached
   if (!cachedToken || !cachedRole) {
@@ -64,21 +64,14 @@ const getApiBaseUrl = async (): Promise<string> => {
       cachedRole = session.user.role || null;
     }
   }
-
-  // For owner role, use subdomain-based URL (your original logic)
-  if (cachedRole === "owner") {
-    const subdomain = getSubdomain();
-    if (subdomain && subdomain !== 'localhost') {
-      const subdomainUrl = `http://${subdomain}.${process.env.NEXT_PUBLIC_DOMIAN_URL_HOST}`;
-      console.log('🔗 Using subdomain-based API URL:', subdomainUrl);
-      return subdomainUrl;
-    }
-  }
-
-  // Default API URL
-  const defaultUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-  console.log('🔗 Using default API URL:', defaultUrl);
-  return defaultUrl;
+  
+  // The backend is deployed as a SINGLE instance, not per-subdomain
+  // Tenant context is handled via X-Tenant-Subdomain header instead
+  
+  // Always use the main API URL - tenant context via headers
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+  console.log('🔗 Using API URL:', apiUrl);
+  return apiUrl;
 };
 
 // Create axios instance with proper CORS and headers
