@@ -12,7 +12,7 @@ interface DashboardLayoutProps {
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [expanded, setExpanded] = useState(true);
   const session = useSession();
-  const role = session?.data?.user?.role || "owner";
+  const role = session?.data?.user?.role || "manger";
   return (
     <div className="flex justify-between min-h-screen w-full bg-muted/40 relative bg-white">
       <div

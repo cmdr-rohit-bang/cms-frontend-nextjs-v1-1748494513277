@@ -78,6 +78,10 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL("/admin/dashboard", request.url));
     }
 
+    if( pathname.startsWith("/admin/users") && token?.role !== "owner") {
+      return NextResponse.redirect(new URL("/admin/dashboard", request.url));
+    }
+
     // Rewrite subdomain requests to the appropriate path
     const rewrittenPath = `/s/${subdomain}${pathname}`;
     return NextResponse.rewrite(new URL(rewrittenPath, request.url));

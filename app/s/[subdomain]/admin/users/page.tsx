@@ -54,9 +54,6 @@ export default function UsersPage() {
 
   const handleAdd = () => router.push("/admin/users/add");
 
-  const handleEdit = (banner: any) => {
-    router.push(`/admin/users/edit/${banner.id}`);
-  };
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -73,12 +70,12 @@ export default function UsersPage() {
     setIsDeleteDialogOpen(false);
   };
 
-  const confirmDelete = async () => {
+  const handleUserVerified = async () => {
     try {
       await fetchData(
         `/auth/tenant/verify-token?token${emailVerificationToken}`
       );
-      toast.success("user verify successfully");
+      toast.success("User verified successfully");
       await fetchUser(currentPage, pageSize, searchQuery);
     } catch (error: any) {
       toast.error(error.message || "Failed to user verify");
@@ -171,7 +168,7 @@ export default function UsersPage() {
       <DeleteConfirmationDialog
         isOpen={isDeleteDialogOpen}
         onClose={closeDeleteDialog}
-        onConfirm={confirmDelete}
+        onConfirm={handleUserVerified}
         isDestruct={false}
         title={"Verify User"}
         description={
